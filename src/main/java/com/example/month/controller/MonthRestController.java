@@ -9,6 +9,8 @@ import com.example.offset.repository.OffsetEntity;
 import com.example.offset.service.OffsetService;
 import com.example.specialday.repository.SpecialDayEntity;
 import com.example.specialday.service.SpecialDayService;
+import com.example.worker.WorkerContainer;
+import com.example.worker.service.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,34 +24,45 @@ public class MonthRestController {
     private OffsetService offsetService;
     private HolidayService holidayService;
     private SpecialDayService specialDayService;
+    private WorkerService workerService;
 
     @Autowired
-    MonthRestController(MonthService monthService, OffsetService offsetService, HolidayService holidayService, SpecialDayService specialDayService) {
+    MonthRestController(MonthService monthService, OffsetService offsetService, HolidayService holidayService, SpecialDayService specialDayService, WorkerService workerService) {
         this.monthService = monthService;
         this.offsetService = offsetService;
         this.holidayService = holidayService;
         this.specialDayService = specialDayService;
+        this.workerService = workerService;
     }
 
     //todo
+    @GetMapping("/{id}/workers")
+    public List<WorkerContainer> getworkers(@PathVariable("id") long id){
+        return workerService.findAllByMonth(id);
+    }
+
     @GetMapping("/{id}")
     public MonthContainer getMonth(@PathVariable("id") long id){
         return monthService.findById(id);
     }
 
+    //ok
     @GetMapping("")
     public List<MonthEntity> findAllMonths(){
         return monthService.findAll();
     }
 
+    //ok
     @PostMapping("")
     public MonthEntity postMonth(@RequestBody MonthEntity monthEntity){
         return monthService.postMonth(monthEntity);
     }
 
+
+    //ok
     @PutMapping("/{id}")
-    public MonthEntity putName(@PathVariable long id, @RequestBody String name){
-        return monthService.putName(name,id);
+    public MonthEntity putMonth(@PathVariable long id, @RequestBody MonthEntity monthEntity){
+        return monthService.putMonth(monthEntity,id);
     }
 
 
@@ -70,8 +83,8 @@ public class MonthRestController {
         return holidayService.put(id, holidayEntity);
     }
 
-    @PutMapping("/{id}/special-day")
-    public SpecialDayEntity switchDay(@PathVariable("id") long id, @RequestBody int day)
+    @PutMapping("/{id}/special-days")
+    public SpecialDayEntity switchDay(@PathVariable("id") long id, @RequestBody SpecialDayEntity day)
     {
         return specialDayService.put(id, day);
     }

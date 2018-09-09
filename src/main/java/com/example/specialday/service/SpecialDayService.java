@@ -13,14 +13,14 @@ public class SpecialDayService {
     @Autowired
     private SpecialDayRepository specialDayRepository;
 
-    public SpecialDayEntity put(long monthId, int day)
+    public SpecialDayEntity put(long monthId, SpecialDayEntity specialDayEntity1)
     {
 
         //todo zamienic na sqlke?
         List<SpecialDayEntity> list = specialDayRepository.findAll();
         for (SpecialDayEntity specialDayEntity: list)
         {
-            if (specialDayEntity.getDay()==day && specialDayEntity.getMonthId()==monthId)
+            if (specialDayEntity.getDay()==specialDayEntity1.getDay() && specialDayEntity.getMonthId()==monthId)
             {
                 specialDayRepository.deleteById(specialDayEntity.getId());
                 return specialDayEntity;
@@ -28,7 +28,7 @@ public class SpecialDayService {
 
         }
         SpecialDayEntity specialDayEntity = new SpecialDayEntity();
-        specialDayEntity.setDay(day);
+        specialDayEntity.setDay(specialDayEntity1.getDay());
         specialDayEntity.setMonthId(monthId);
         return specialDayRepository.save(specialDayEntity);
 

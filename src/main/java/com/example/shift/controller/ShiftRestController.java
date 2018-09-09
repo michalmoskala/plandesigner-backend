@@ -17,22 +17,25 @@ public class ShiftRestController {
     }
 
 
+
     @PostMapping("")
     public ShiftEntity postShift(@RequestBody ShiftEntity shiftEntity)
     {
         return shiftService.postShift(shiftEntity);
     }
 
-    @PutMapping("/{id}/time")
+    @PutMapping("/{id}")
     public ShiftEntity putTime(@PathVariable long id, @RequestBody ShiftEntity shiftEntity){
         return shiftService.putTime(shiftEntity,id);
     }
 
+    //hujowo lepiej nie uzywac
     @PutMapping("/{id}/worker")
     public ShiftEntity putWorker(@PathVariable long id, @RequestBody long workerId){
         return shiftService.putWorker(workerId,id);
     }
 
+    //hujowo lepiej nie uzywac
     @PutMapping("/{id}/minutes")
     public ShiftEntity putMinutes(@PathVariable long id, @RequestBody int minutes){
         return shiftService.putMinutes(minutes,id);

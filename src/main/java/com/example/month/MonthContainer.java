@@ -7,7 +7,6 @@ import com.example.specialday.repository.SpecialDayEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-//todo dostep i moze @entity
 public class MonthContainer {
     private MonthEntity monthEntity;
     private List<SpecialDayEntity> specialDayEntities;

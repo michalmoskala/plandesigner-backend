@@ -10,6 +10,7 @@ import com.example.specialday.repository.SpecialDayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,17 +29,21 @@ public class MonthService {
     public MonthContainer findById(long id){
         MonthEntity monthEntity = monthRepository.findById(id).get();
         //todo concurrent?
+
+
         List<ShiftEntity> shiftEntities = shiftRepository.findAll();
+        List<ShiftEntity> shiftEntities1 = new ArrayList<>();
         for (ShiftEntity shiftEntity: shiftEntities)
-            if(shiftEntity.getMonthId()!=id)
-                shiftEntities.remove(shiftEntity);
+            if(shiftEntity.getMonthId()==id)
+                shiftEntities1.add(shiftEntity);
 
         List<SpecialDayEntity> specialDayEntities = specialDayRepository.findAll();
+        List<SpecialDayEntity> specialDayEntities1 = new ArrayList<>();
         for (SpecialDayEntity specialDayEntity: specialDayEntities)
-            if(specialDayEntity.getMonthId()!=id)
-                specialDayEntities.remove(specialDayEntity);
+            if(specialDayEntity.getMonthId()==id)
+                specialDayEntities1.add(specialDayEntity);
 
-        return new MonthContainer(monthEntity,specialDayEntities,shiftEntities);
+        return new MonthContainer(monthEntity,specialDayEntities1,shiftEntities1);
     }
 
     public List<MonthEntity> findAll(){
@@ -49,10 +54,11 @@ public class MonthService {
         return monthRepository.save(monthEntity);
     }
 
-    public MonthEntity putName(String name, long id)
+    public MonthEntity putMonth(MonthEntity monthEntity1, long id)
     {
+
         MonthEntity monthEntity = monthRepository.findById(id).get();
-        monthEntity.setName(name);
+        monthEntity.setName(monthEntity1.getName());
         return monthRepository.save(monthEntity);
     }
 
