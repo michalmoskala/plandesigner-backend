@@ -10,6 +10,7 @@ import com.example.offset.service.OffsetService;
 import com.example.specialday.repository.SpecialDayEntity;
 import com.example.specialday.service.SpecialDayService;
 import com.example.worker.WorkerContainer;
+import com.example.worker.service.WorkerDTO;
 import com.example.worker.service.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -37,13 +38,13 @@ public class MonthRestController {
 
     //todo
     @GetMapping("/{id}/workers")
-    public List<WorkerContainer> getworkers(@PathVariable("id") long id){
+    public List<WorkerDTO> getworkers(@PathVariable("id") long id){
         return workerService.findAllByMonth(id);
     }
 
     @GetMapping("/{id}")
     public MonthContainer getMonth(@PathVariable("id") long id){
-        return monthService.findById(id);
+        return monthService.getMonthContainer(id);
     }
 
     //ok

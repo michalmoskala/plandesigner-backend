@@ -2,8 +2,11 @@ package com.example.shift.service;
 
 import com.example.shift.repository.ShiftEntity;
 import com.example.shift.repository.ShiftRepository;
+import com.example.worker.repository.WorkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ShiftService {
@@ -11,10 +14,24 @@ public class ShiftService {
     @Autowired
     private ShiftRepository shiftRepository;
 
+    @Autowired
+    private WorkerRepository workerRepository;
 
-    public ShiftEntity postShift(ShiftEntity shiftEntity)
+
+    public ShiftDTO postShift(ShiftEntity shiftEntity)
     {
-        return shiftRepository.save(shiftEntity);
+        //todo jpql
+        List<ShiftEntity> shiftEntityList = shiftRepository.findAll();
+        for (ShiftEntity shiftEntity1: shiftEntityList){
+            if (shiftEntity1.getMonthId()==shiftEntity.getMonthId()&&shiftEntity1.getDay()==shiftEntity.getDay()&&shiftEntity1.getWhichTime()==shiftEntity.getWhichTime())
+            {
+                shiftRepository.deleteById(shiftEntity1.getId());
+                break;
+            }
+        }
+
+        ShiftEntity shiftEntity1 = shiftRepository.save(shiftEntity);
+        return new ShiftDTO(shiftEntity1,workerRepository.findById(shiftEntity1.getWorkerId()).get().getShortname());
     }
 
     public ShiftEntity putTime(ShiftEntity shiftEntity, long id)

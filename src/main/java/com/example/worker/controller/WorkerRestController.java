@@ -5,6 +5,9 @@ import com.example.worker.service.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/workers")
 public class WorkerRestController {
@@ -20,6 +23,12 @@ public class WorkerRestController {
     @GetMapping("/{id}")
     public WorkerEntity getworker(@PathVariable("id") long id){
         return workerService.findById(id).get();
+    }
+
+    @GetMapping("")
+    public List<WorkerEntity> getWorkers()
+    {
+        return workerService.getAllWorkers();
     }
 
 

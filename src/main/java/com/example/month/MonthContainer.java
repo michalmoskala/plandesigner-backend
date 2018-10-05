@@ -9,13 +9,11 @@ import java.util.List;
 
 public class MonthContainer {
     private MonthEntity monthEntity;
-    private List<SpecialDayEntity> specialDayEntities;
-    private List<ShiftEntity> shiftEntities;
+    private ArrayList<DayEntity> dayEntities;
 
-    public MonthContainer(MonthEntity monthEntity, List<SpecialDayEntity> specialDayEntities, List<ShiftEntity> shiftEntities) {
+    public MonthContainer(MonthEntity monthEntity, ArrayList<DayEntity> dayEntities) {
         this.monthEntity = monthEntity;
-        this.specialDayEntities = specialDayEntities;
-        this.shiftEntities = shiftEntities;
+        this.dayEntities = dayEntities;
     }
 
     public MonthEntity getMonthEntity() {
@@ -26,19 +24,12 @@ public class MonthContainer {
         this.monthEntity = monthEntity;
     }
 
-    public List<SpecialDayEntity> getSpecialDayEntities() {
-        return specialDayEntities;
+    public List<DayEntity> getDayEntities() {
+        return dayEntities;
     }
 
-    public void setSpecialDayEntities(ArrayList<SpecialDayEntity> specialDayEntities) {
-        this.specialDayEntities = specialDayEntities;
-    }
-
-    public List<ShiftEntity> getShiftEntities() {
-        return shiftEntities;
-    }
-
-    public void setShiftEntities(ArrayList<ShiftEntity> shiftEntities) {
-        this.shiftEntities = shiftEntities;
+    public void setDayEntities(ArrayList<DayEntity> dayEntities) {
+        this.dayEntities = dayEntities;
     }
 }
+

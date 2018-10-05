@@ -1,6 +1,7 @@
 package com.example.shift.controller;
 
 import com.example.shift.repository.ShiftEntity;
+import com.example.shift.service.ShiftDTO;
 import com.example.shift.service.ShiftService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class ShiftRestController {
 
 
     @PostMapping("")
-    public ShiftEntity postShift(@RequestBody ShiftEntity shiftEntity)
+    public ShiftDTO postShift(@RequestBody ShiftEntity shiftEntity)
     {
         return shiftService.postShift(shiftEntity);
     }

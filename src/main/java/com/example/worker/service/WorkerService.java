@@ -4,12 +4,10 @@ import com.example.holiday.repository.HolidayEntity;
 import com.example.holiday.repository.HolidayRepository;
 import com.example.offset.repository.OffsetEntity;
 import com.example.offset.repository.OffsetRepository;
-import com.example.offset.service.OffsetService;
 import com.example.shift.repository.ShiftEntity;
 import com.example.shift.repository.ShiftRepository;
 import com.example.specialday.repository.SpecialDayEntity;
 import com.example.specialday.repository.SpecialDayRepository;
-import com.example.worker.WorkerContainer;
 import com.example.worker.repository.WorkerEntity;
 import com.example.worker.repository.WorkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +51,8 @@ public class WorkerService {
 
     }
 
-    public List<WorkerContainer> findAllByMonth(long monthId){
-        ArrayList<WorkerContainer> workerContainers = new ArrayList<>();
+    public List<WorkerDTO> findAllByMonth(long monthId){
+        ArrayList<WorkerDTO> workerContainers = new ArrayList<>();
         
         List<WorkerEntity> workers = workerRepository.findAll();
         List<ShiftEntity> shiftEntities = shiftRepository.findAll();
@@ -64,7 +62,7 @@ public class WorkerService {
 
         for (WorkerEntity worker: workers) {
             List<ShiftEntity> shiftsForWorker = getAllShiftsForWorkerForMonth(worker,shiftEntities,monthId);
-            WorkerContainer workerContainer = prepareContainerForWorker(worker,shiftsForWorker,specialDayEntitiesOnlyForMonth(monthId,specialDayEntities));
+            WorkerDTO workerContainer = prepareContainerForWorker(worker,shiftsForWorker,specialDayEntitiesOnlyForMonth(monthId,specialDayEntities));
             workerContainer.setOffsetMinutes(findOffsetMinutesForWorker(worker,offsetEntities,monthId));
             workerContainer.setDaysOnHoliday(findDaysOnHolidayForWorker(worker,holidayEntities,monthId));
             workerContainer.setMinutes();
@@ -123,7 +121,7 @@ public class WorkerService {
         return false;
     }
 
-    private WorkerContainer prepareContainerForWorker(WorkerEntity worker, List<ShiftEntity> workerShifts, List<SpecialDayEntity> specialDays)
+    private WorkerDTO prepareContainerForWorker(WorkerEntity worker, List<ShiftEntity> workerShifts, List<SpecialDayEntity> specialDays)
     {
         int workedMinutes = 0;
         int weekendMinutes = 0;
@@ -134,9 +132,12 @@ public class WorkerService {
             if(isSpecial(shift,specialDays))
                 weekendMinutes+=shift.getMinutes();
         }
-        return new WorkerContainer(worker,workedMinutes,weekendMinutes);
+        return new WorkerDTO(worker,workedMinutes,weekendMinutes);
 
 
     }
 
+    public List<WorkerEntity> getAllWorkers() {
+        return workerRepository.findAll();
+    }
 }
