@@ -30,16 +30,10 @@ public class ShiftRestController {
         return shiftService.putTime(shiftEntity,id);
     }
 
-    //hujowo lepiej nie uzywac
-    @PutMapping("/{id}/worker")
-    public ShiftEntity putWorker(@PathVariable long id, @RequestBody long workerId){
-        return shiftService.putWorker(workerId,id);
-    }
 
-    //hujowo lepiej nie uzywac
-    @PutMapping("/{id}/minutes")
-    public ShiftEntity putMinutes(@PathVariable long id, @RequestBody int minutes){
-        return shiftService.putMinutes(minutes,id);
+    @PutMapping("/minutes/{id}")
+    public ShiftEntity putMinutes(@PathVariable long id) {
+        return shiftService.putMinutes(id);
     }
 
     @DeleteMapping("/{id}")
@@ -47,6 +41,11 @@ public class ShiftRestController {
         shiftService.deleteById(id);
     }
 
+    //hujowo lepiej nie uzywac
+    @PutMapping("/{id}/worker")
+    public ShiftEntity putWorker(@PathVariable long id, @RequestBody long workerId){
+        return shiftService.putWorker(workerId,id);
+    }
 
 
 }

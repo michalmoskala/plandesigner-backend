@@ -51,11 +51,14 @@ public class ShiftService {
 
     }
 
-    public ShiftEntity putMinutes(int minutes, long id)
+    public ShiftEntity putMinutes(long id)
     {
-        ShiftEntity shiftEntity1 = shiftRepository.findById(id).get();
-        shiftEntity1.setMinutes(minutes);
-        return shiftRepository.save(shiftEntity1);
+        ShiftEntity shiftEntity = shiftRepository.findById(id).get();
+        if (shiftEntity.getMinutes()==300)
+            shiftEntity.setMinutes(720);
+        else
+            shiftEntity.setMinutes(300);
+        return shiftEntity;
     }
 
     public void deleteById(long id)

@@ -1,6 +1,5 @@
 package com.example.month;
 
-import com.example.shift.repository.ShiftEntity;
 import com.example.shift.service.ShiftDTO;
 
 import java.util.HashMap;
@@ -14,7 +13,16 @@ public class DayEntity{
     ShiftDTO shiftTwo;
     ShiftDTO shiftThree;
     ShiftDTO shiftFour;
+    String weekday;
 
+
+    public String getWeekday() {
+        return weekday;
+    }
+
+    public void setWeekday(String weekday) {
+        this.weekday = weekday;
+    }
 
     public DayEntity(int i) {
         this.number=i;
