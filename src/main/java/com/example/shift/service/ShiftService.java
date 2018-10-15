@@ -58,7 +58,7 @@ public class ShiftService {
             shiftEntity.setMinutes(720);
         else
             shiftEntity.setMinutes(300);
-        return shiftEntity;
+        return shiftRepository.save(shiftEntity);
     }
 
     public void deleteById(long id)
