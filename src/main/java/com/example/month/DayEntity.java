@@ -13,14 +13,14 @@ public class DayEntity{
     ShiftDTO shiftTwo;
     ShiftDTO shiftThree;
     ShiftDTO shiftFour;
-    String weekday;
+    int weekday;
 
 
-    public String getWeekday() {
+    public int getWeekday() {
         return weekday;
     }
 
-    public void setWeekday(String weekday) {
+    public void setWeekday(int weekday) {
         this.weekday = weekday;
     }
 

@@ -47,6 +47,12 @@ public class MonthRestController {
         return monthService.getMonthContainer(id);
     }
 
+
+    @GetMapping("/{id}/algorithm")
+    public List<String> getVerification(@PathVariable("id") long id){
+        return monthService.getMonthVerification(id);
+    }
+
     //ok
     @GetMapping("")
     public List<MonthEntity> findAllMonths(){

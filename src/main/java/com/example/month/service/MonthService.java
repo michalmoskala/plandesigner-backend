@@ -57,6 +57,7 @@ public class MonthService {
             DayEntity dayEntity = new DayEntity(i);
             dayEntity.setSpecial(isSpecial(i,specialDays));
             dayEntity.setShifts(getShiftsForDay(i, shiftEntities,workerEntities));
+            dayEntity.setWeekday(((monthEntity.getStartingDay()+i-2)%7)+1);
             dayentities.add(dayEntity);
         }
         return dayentities;
@@ -132,8 +133,108 @@ public class MonthService {
     }
 
 
+    public List<String> getMonthVerification(long monthId)
+    {
+        ArrayList<String> issues = new ArrayList<>();
+        ArrayList<DayEntity> dayEntities = fillDayEntities(monthRepository.findById(monthId).get());
+        List<WorkerEntity> workerEntities = workerRepository.findAll();
+        HashMap<Long,Integer> sundays = new HashMap<>();
+        for (WorkerEntity workerEntity: workerEntities) {
+            sundays.put(workerEntity.getId(),0);
+        }
+
+        for(DayEntity dayEntity:dayEntities){
+            if (dayEntity.getWeekday()==7) {
+                if (dayEntity.getShiftOne()  != null) sundays.put(dayEntity.getShiftOne().getWorkerId(),   sundays.get(dayEntity.getShiftOne().getWorkerId())   + 1);
+                if (dayEntity.getShiftTwo()  != null) sundays.put(dayEntity.getShiftTwo().getWorkerId(),   sundays.get(dayEntity.getShiftTwo().getWorkerId())   + 1);
+                if (dayEntity.getShiftThree()!= null) sundays.put(dayEntity.getShiftThree().getWorkerId(), sundays.get(dayEntity.getShiftThree().getWorkerId()) + 1);
+                if (dayEntity.getShiftFour() != null) sundays.put(dayEntity.getShiftFour().getWorkerId(),  sundays.get(dayEntity.getShiftFour().getWorkerId())  + 1);
+            }
+        }
+
+        for (WorkerEntity workerEntity: workerEntities) {
+            if (sundays.get(workerEntity.getId())>3)
+                issues.add(workerEntity.getName().concat("+niedz"));
+        }
+        //
+        HashMap<Long,Integer> minutesInAWeek = new HashMap<>();
+        for (WorkerEntity workerEntity: workerEntities) {
+            minutesInAWeek.put(workerEntity.getId(),0);
+        }
+
+        for(DayEntity dayEntity:dayEntities){
+            if (dayEntity.getNumber()<=7) {
+                if (dayEntity.getShiftOne() != null) {minutesInAWeek.put(dayEntity.getShiftOne().getWorkerId(),   minutesInAWeek.get(dayEntity.getShiftOne().getWorkerId())   + dayEntity.getShiftOne().getMinutes());}
+                if (dayEntity.getShiftTwo() != null) minutesInAWeek.put(dayEntity.getShiftTwo().getWorkerId(),   minutesInAWeek.get(dayEntity.getShiftTwo().getWorkerId())   + dayEntity.getShiftTwo().getMinutes());
+                if (dayEntity.getShiftThree()!= null) minutesInAWeek.put(dayEntity.getShiftThree().getWorkerId(), minutesInAWeek.get(dayEntity.getShiftThree().getWorkerId()) + dayEntity.getShiftThree().getMinutes());
+                if (dayEntity.getShiftFour() != null) minutesInAWeek.put(dayEntity.getShiftFour().getWorkerId(),  minutesInAWeek.get(dayEntity.getShiftFour().getWorkerId())  + dayEntity.getShiftFour().getMinutes());
+            }
+        }
+//
+        for (WorkerEntity workerEntity: workerEntities) {
+            if (minutesInAWeek.get(workerEntity.getId())>48*60)
+                issues.add(workerEntity.getName().concat("+1week"));
+        }
+
+        for (WorkerEntity workerEntity: workerEntities) {
+            minutesInAWeek.put(workerEntity.getId(),0);
+        }
+
+        for(DayEntity dayEntity:dayEntities){
+            if (dayEntity.getNumber()>7&&dayEntity.getNumber()<=14) {
+                if (dayEntity.getShiftOne()  != null) minutesInAWeek.put(dayEntity.getShiftOne().getWorkerId(),   minutesInAWeek.get(dayEntity.getShiftOne().getWorkerId())   + dayEntity.getShiftOne().getMinutes());
+                if (dayEntity.getShiftTwo()  != null) minutesInAWeek.put(dayEntity.getShiftTwo().getWorkerId(),   minutesInAWeek.get(dayEntity.getShiftTwo().getWorkerId())   + dayEntity.getShiftTwo().getMinutes());
+                if (dayEntity.getShiftThree()!= null) minutesInAWeek.put(dayEntity.getShiftThree().getWorkerId(), minutesInAWeek.get(dayEntity.getShiftThree().getWorkerId()) + dayEntity.getShiftThree().getMinutes());
+                if (dayEntity.getShiftFour() != null) minutesInAWeek.put(dayEntity.getShiftFour().getWorkerId(),  minutesInAWeek.get(dayEntity.getShiftFour().getWorkerId())  + dayEntity.getShiftFour().getMinutes());
+            }
+        }
+
+        for (WorkerEntity workerEntity: workerEntities) {
+            if (minutesInAWeek.get(workerEntity.getId())>48*60)
+                issues.add(workerEntity.getName().concat("+2week"));
+        }
+
+        for (WorkerEntity workerEntity: workerEntities) {
+            minutesInAWeek.put(workerEntity.getId(),0);
+        }
+
+        for(DayEntity dayEntity:dayEntities){
+            if (dayEntity.getNumber()>14&&dayEntity.getNumber()<=21) {
+                if (dayEntity.getShiftOne() != null) {minutesInAWeek.put(dayEntity.getShiftOne().getWorkerId(),   minutesInAWeek.get(dayEntity.getShiftOne().getWorkerId())   + dayEntity.getShiftOne().getMinutes());}
+                if (dayEntity.getShiftTwo() != null) minutesInAWeek.put(dayEntity.getShiftTwo().getWorkerId(),   minutesInAWeek.get(dayEntity.getShiftTwo().getWorkerId())   + dayEntity.getShiftTwo().getMinutes());
+                if (dayEntity.getShiftThree()!= null) minutesInAWeek.put(dayEntity.getShiftThree().getWorkerId(), minutesInAWeek.get(dayEntity.getShiftThree().getWorkerId()) + dayEntity.getShiftThree().getMinutes());
+                if (dayEntity.getShiftFour() != null) minutesInAWeek.put(dayEntity.getShiftFour().getWorkerId(),  minutesInAWeek.get(dayEntity.getShiftFour().getWorkerId())  + dayEntity.getShiftFour().getMinutes());
+            }
+        }
+//
+        for (WorkerEntity workerEntity: workerEntities) {
+            if (minutesInAWeek.get(workerEntity.getId())>48*60)
+                issues.add(workerEntity.getName().concat("+3week"));
+        }
+
+        for (WorkerEntity workerEntity: workerEntities) {
+            minutesInAWeek.put(workerEntity.getId(),0);
+        }
+
+        for(DayEntity dayEntity:dayEntities){
+            if (dayEntity.getNumber()>21&&dayEntity.getNumber()<=28) {
+                if (dayEntity.getShiftOne()  != null) minutesInAWeek.put(dayEntity.getShiftOne().getWorkerId(),   minutesInAWeek.get(dayEntity.getShiftOne().getWorkerId())   + dayEntity.getShiftOne().getMinutes());
+                if (dayEntity.getShiftTwo()  != null) minutesInAWeek.put(dayEntity.getShiftTwo().getWorkerId(),   minutesInAWeek.get(dayEntity.getShiftTwo().getWorkerId())   + dayEntity.getShiftTwo().getMinutes());
+                if (dayEntity.getShiftThree()!= null) minutesInAWeek.put(dayEntity.getShiftThree().getWorkerId(), minutesInAWeek.get(dayEntity.getShiftThree().getWorkerId()) + dayEntity.getShiftThree().getMinutes());
+                if (dayEntity.getShiftFour() != null) minutesInAWeek.put(dayEntity.getShiftFour().getWorkerId(),  minutesInAWeek.get(dayEntity.getShiftFour().getWorkerId())  + dayEntity.getShiftFour().getMinutes());
+            }
+        }
+
+        for (WorkerEntity workerEntity: workerEntities) {
+            if (minutesInAWeek.get(workerEntity.getId())>48*60)
+                issues.add(workerEntity.getName().concat("+4week"));
+        }
+
+        return issues;
 
 
 
+//        for (HashMap.Entry<String, String> entry : map.entrySet())
 
+    }
 }
