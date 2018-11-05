@@ -48,9 +48,9 @@ public class MonthRestController {
     }
 
 
-    @GetMapping("/{id}/algorithm")
-    public List<String> getVerification(@PathVariable("id") long id){
-        return monthService.getMonthVerification(id);
+    @GetMapping("/{id}/penalties")
+    public Integer getVerification(@PathVariable("id") long id){
+        return monthService.getSumOfPenalties(id);
     }
 
     //ok
