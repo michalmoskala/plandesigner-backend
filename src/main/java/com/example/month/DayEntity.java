@@ -4,8 +4,6 @@ import com.example.shift.service.ShiftDTO;
 
 import java.util.HashMap;
 
-//todo automatyczne speciale
-//todo dzien tygodnia
 public class DayEntity{
     int number;
     boolean isSpecial;

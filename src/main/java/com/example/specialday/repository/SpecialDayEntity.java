@@ -17,6 +17,11 @@ public class SpecialDayEntity {
         super();
     }
 
+    public SpecialDayEntity(long monthId, int day) {
+        this.monthId = monthId;
+        this.day = day;
+    }
+
     public long getId() {
         return id;
     }

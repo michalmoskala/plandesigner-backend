@@ -1,25 +1,42 @@
 package com.example.month;
 
+import com.example.holiday.service.HolidayDTO;
 import com.example.month.repository.MonthEntity;
+import com.example.specialday.repository.SpecialDayEntity;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class MapTrio {
     HashMap<Shift, Long> immutable;
-    HashMap<Shift, Long> mutable;
+    LinkedHashMap<Shift, Long> mutable;
     HashMap<Shift, Integer> minutes;
     MonthEntity monthEntity;
     HashMap<Long, Integer> offsets;
-    HashMap<Long, Integer> holidays;
+    HashMap<Long, HolidayDTO> holidays;
+    List<SpecialDayEntity> specialDayEntities;
 
-
-    public MapTrio(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutes, MonthEntity monthEntity, HashMap<Long, Integer> offsets, HashMap<Long, Integer> holidays) {
+    public MapTrio(HashMap<Shift, Long> immutable, LinkedHashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutes, MonthEntity monthEntity, HashMap<Long, Integer> offsets, HashMap<Long, HolidayDTO> holidays, List<SpecialDayEntity> specialDayEntities) {
         this.immutable = immutable;
         this.mutable = mutable;
         this.minutes = minutes;
         this.monthEntity = monthEntity;
         this.offsets = offsets;
         this.holidays = holidays;
+        this.specialDayEntities = specialDayEntities;
+    }
+
+    public MapTrio(MapTrio mapTrio, LinkedHashMap<Shift, Long> mutable)
+    {
+        this.immutable = mapTrio.immutable;
+        this.mutable = mutable;
+        this.minutes = mapTrio.minutes;
+        this.monthEntity = mapTrio.monthEntity;
+        this.offsets = mapTrio.offsets;
+        this.holidays = mapTrio.holidays;
+        this.specialDayEntities = mapTrio.specialDayEntities;
+
     }
 
     public HashMap<Shift, Long> getImmutable() {
@@ -30,11 +47,11 @@ public class MapTrio {
         this.immutable = immutable;
     }
 
-    public HashMap<Shift, Long> getMutable() {
+    public LinkedHashMap<Shift, Long> getMutable() {
         return mutable;
     }
 
-    public void setMutable(HashMap<Shift, Long> mutable) {
+    public void setMutable(LinkedHashMap<Shift, Long> mutable) {
         this.mutable = mutable;
     }
 
@@ -62,11 +79,19 @@ public class MapTrio {
         this.offsets = offsets;
     }
 
-    public HashMap<Long, Integer> getHolidays() {
+    public HashMap<Long, HolidayDTO> getHolidays() {
         return holidays;
     }
 
-    public void setHolidays(HashMap<Long, Integer> holidays) {
+    public void setHolidays(HashMap<Long, HolidayDTO> holidays) {
         this.holidays = holidays;
+    }
+
+    public List<SpecialDayEntity> getSpecialDayEntities() {
+        return specialDayEntities;
+    }
+
+    public void setSpecialDayEntities(List<SpecialDayEntity> specialDayEntities) {
+        this.specialDayEntities = specialDayEntities;
     }
 }

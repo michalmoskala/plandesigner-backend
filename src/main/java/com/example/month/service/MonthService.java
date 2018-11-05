@@ -2,6 +2,7 @@ package com.example.month.service;
 
 import com.example.holiday.repository.HolidayEntity;
 import com.example.holiday.repository.HolidayRepository;
+import com.example.holiday.service.HolidayDTO;
 import com.example.month.*;
 import com.example.month.repository.MonthEntity;
 import com.example.month.repository.MonthRepository;
@@ -12,16 +13,13 @@ import com.example.shift.repository.ShiftRepository;
 import com.example.shift.service.ShiftDTO;
 import com.example.specialday.repository.SpecialDayEntity;
 import com.example.specialday.repository.SpecialDayRepository;
+import com.example.specialday.service.SpecialDayService;
 import com.example.worker.repository.WorkerEntity;
 import com.example.worker.repository.WorkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class MonthService {
@@ -43,6 +41,9 @@ public class MonthService {
 
     @Autowired
     private HolidayRepository holidayRepository;
+
+    @Autowired
+    private SpecialDayService specialDayService;
 
 
     public MonthContainer getMonthContainer(long monthId){
@@ -127,7 +128,11 @@ public class MonthService {
     }
 
     public MonthEntity postMonth(MonthEntity monthEntity){
-        return monthRepository.save(monthEntity);
+        MonthEntity monthEntity1 = monthRepository.save(monthEntity);
+        for(int i=1;i<monthEntity1.getDays();i++)
+            if ((((monthEntity.getStartingDay()+i-2)%7)+1) == 7  || (((monthEntity.getStartingDay()+i-2)%7)+1) == 6)
+                specialDayService.put(monthEntity1.getId(),new SpecialDayEntity(monthEntity1.getId(),i));
+        return monthEntity1;
     }
 
     public MonthEntity putMonth(MonthEntity monthEntity1, long id)
@@ -154,42 +159,143 @@ public class MonthService {
         return 0;
     }
 
-    private int findDaysOnHolidayForWorker(WorkerEntity worker, List<HolidayEntity> holidayEntities, long monthId)
+    private HolidayDTO findDaysOnHolidayForWorker(WorkerEntity worker, List<HolidayEntity> holidayEntities, long monthId)
     {
         for (HolidayEntity holidayEntity:holidayEntities)
         {
             if(holidayEntity.getMonthId() == monthId && holidayEntity.getWorkerId() == worker.getId())
-                return holidayEntity.getDays();
+                return new HolidayDTO(holidayEntity.getDays()*455,holidayEntity.getFirstDay(),holidayEntity.getLastDay());
         }
-        return 0;
+        return new HolidayDTO(0,32,0);
     }
 
     public int getSumOfPenalties(long monthId)
     {
-        MapTrio mapTrio = createMonthMap(monthId, new ArrayList<>());
-        int penalty=0;
+        //todo:
+        ArrayList<Shift> immutableEmpties = new ArrayList<>();
+        immutableEmpties.add(new Shift(3,1));
+        immutableEmpties.add(new Shift(4,1));
+        immutableEmpties.add(new Shift(5,1));
+        immutableEmpties.add(new Shift(6,1));
+        immutableEmpties.add(new Shift(7,1));
+        immutableEmpties.add(new Shift(10,1));
+        immutableEmpties.add(new Shift(11,1));
+        immutableEmpties.add(new Shift(12,1));
+        immutableEmpties.add(new Shift(13,1));
+        immutableEmpties.add(new Shift(14,1));
+        immutableEmpties.add(new Shift(17,1));
+        immutableEmpties.add(new Shift(18,1));
+        immutableEmpties.add(new Shift(19,1));
+        immutableEmpties.add(new Shift(20,1));
+        immutableEmpties.add(new Shift(21,1));
+        immutableEmpties.add(new Shift(24,1));
+        immutableEmpties.add(new Shift(25,1));
+        immutableEmpties.add(new Shift(26,1));
+        immutableEmpties.add(new Shift(27,1));
+        immutableEmpties.add(new Shift(28,1));
 
-        penalty += getMonthlyPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMinutes(), mapTrio.getOffsets(), mapTrio.getHolidays());
-        penalty += getSundaysPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMonthEntity().getStartingDay());
-        penalty += getWeeklyPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMinutes());
-        penalty += getNightsInARowAndDayAfterNightAndSameDayWorkPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMonthEntity().getDays());//todo length
+        List<WorkerEntity> workerEntities = workerRepository.findAll();
+        MapTrio mapTrio = createMonthMap(monthId, immutableEmpties, workerEntities);
+        int penalty;
+        HashMap<Long,Integer> workerToPenalty = new HashMap<>();
+        Map.Entry<Long, Integer> min = null;
+
+
+        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+            for (WorkerEntity workerEntity : workerEntities) {
+                mapTrio.getMutable().put(mapEntry.getKey(), workerEntity.getId());
+                workerToPenalty.put(workerEntity.getId(), getPenalty(mapTrio));
+            }
+            for(Map.Entry<Long, Integer> entry:workerToPenalty.entrySet()) {
+                if (min == null || min.getValue() > entry.getValue()) {
+                    min = entry;
+                }
+            }
+            mapTrio.getMutable().put(mapEntry.getKey(), min.getKey());
+        }
+
+        System.out.println(getPenalty(mapTrio));
+
+        int prev=Integer.MAX_VALUE;
+        LinkedHashMap<Shift, Long> newMutable;
+        for (int i=0;i<100;i++){
+            for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+                 for (WorkerEntity workerEntity : workerEntities){
+                     newMutable = new LinkedHashMap<>(mapTrio.getMutable());
+                     newMutable.put(mapEntry.getKey(),workerEntity.getId());
+                     if(getPenalty(new MapTrio(mapTrio,newMutable))<getPenalty(mapTrio))
+                         mapTrio.setMutable(newMutable);
+                 }
+            }
+            System.out.println(getPenalty(mapTrio));
+            if (getPenalty(mapTrio)<prev)
+                prev=getPenalty(mapTrio);
+            else
+                break;
+        }
+
+        penalty = getPenalty(mapTrio);
+
+        int i=0;
+        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+            i++;
+            if(i%20==0)
+            System.out.println(i);
+            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
+        }
 
         return penalty;
     }
 
-    private MapTrio createMonthMap(long monthId, ArrayList<Shift> listOfImmutableEmptyShifts) {
+    public ShiftDTO postShift(Map.Entry<Shift, Long> workerEntry, Integer minutes, long monthId)
+    {
+        ShiftEntity shiftEntity = new ShiftEntity();
+        shiftEntity.setMinutes(minutes);
+        shiftEntity.setDay(workerEntry.getKey().getDay());
+        shiftEntity.setWorkerId(workerEntry.getValue());
+        shiftEntity.setWhichTime(workerEntry.getKey().getTime());
+        shiftEntity.setMonthId(monthId);
+
+        //todo jpql
+        List<ShiftEntity> shiftEntityList = shiftRepository.findAll();
+        for (ShiftEntity shiftEntity1: shiftEntityList){
+            if (shiftEntity1.getMonthId()==shiftEntity.getMonthId()&&shiftEntity1.getDay()==shiftEntity.getDay()&&shiftEntity1.getWhichTime()==shiftEntity.getWhichTime())
+            {
+                shiftRepository.deleteById(shiftEntity1.getId());
+                break;
+            }
+        }
+
+        ShiftEntity shiftEntity1 = shiftRepository.save(shiftEntity);
+        return new ShiftDTO(shiftEntity1,workerRepository.findById(shiftEntity1.getWorkerId()).get().getShortname());
+    }
+
+    private int getPenalty(MapTrio mapTrio){
+        int penalty = 0;
+        penalty += getMonthlyPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMinutes(), mapTrio.getOffsets(), mapTrio.getHolidays());
+        penalty += getSundaysPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMonthEntity().getStartingDay());
+        penalty += getWeeklyPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMinutes());
+        penalty += getNightsInARowAndDayAfterNightAndSameDayAnd12sInARowPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMonthEntity().getDays());
+        penalty += getHolidayPenalty(mapTrio.getImmutable(),mapTrio.getMutable(),mapTrio.getHolidays());
+        penalty += getSpecialDayPenalty(mapTrio.getImmutable(),mapTrio.getMutable(),mapTrio.getMinutes(),mapTrio.getSpecialDayEntities());
+        return penalty;
+    }
+
+    private MapTrio createMonthMap(long monthId, ArrayList<Shift> listOfImmutableEmptyShifts, List<WorkerEntity> workerEntities) {
         HashMap<Shift, Long> immutable = new HashMap<>();
-        HashMap<Shift, Long> mutable = new HashMap<>();
+        LinkedHashMap<Shift, Long> mutable = new LinkedHashMap<>();
         HashMap<Shift, Integer> minutes = new HashMap<>();
         HashMap<Long, Integer> offsets = new HashMap<>();
-        HashMap<Long, Integer> holidays = new HashMap<>();
+        HashMap<Long, HolidayDTO> holidays = new HashMap<>();
+
 
         List<OffsetEntity> offsetEntities = offsetRepository.findAll();
         List<HolidayEntity> holidayEntities = holidayRepository.findAll();
-        List<WorkerEntity> workerEntities = workerRepository.findAll();
+        List<SpecialDayEntity> specialDayEntities = filterSpecialDaysForMonth(specialDayRepository.findAll(),monthId);
+
         for (WorkerEntity workerEntity: workerEntities){
-            offsets.put(workerEntity.getId(), findDaysOnHolidayForWorker(workerEntity,holidayEntities,monthId)*455);
-            holidays.put(workerEntity.getId(), findOffsetMinutesForWorker(workerEntity,offsetEntities,monthId));
+            holidays.put(workerEntity.getId(), findDaysOnHolidayForWorker(workerEntity,holidayEntities,monthId));
+            offsets.put(workerEntity.getId(), findOffsetMinutesForWorker(workerEntity,offsetEntities,monthId));
         }
 
         MonthEntity monthEntity = monthRepository.findById(monthId).get();
@@ -248,7 +354,7 @@ public class MonthService {
                 minutes.put(new Shift(dayEntity.getNumber(), 4),720);
             }
         }
-        return new MapTrio(immutable,mutable,minutes,monthEntity,offsets,holidays);
+        return new MapTrio(immutable,mutable,minutes,monthEntity,offsets,holidays,specialDayEntities);
     }
 
     private int getSundaysPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, int startingDay) {
@@ -267,7 +373,7 @@ public class MonthService {
             //system.out.println(mapEntry.getValue());
             if (mapEntry.getValue() != null)
                 sundays.put(mapEntry.getValue(),0);
-//            //system.out.println("penis");
+//            //system.out.println("eni");
         }
 
         for (Map.Entry<Shift,Long> mapEntry : allShifts.entrySet()) {
@@ -283,10 +389,50 @@ public class MonthService {
         for (Map.Entry<Long, Integer> mapEntry : sundays.entrySet()) {
             if (mapEntry.getValue() > 3)
                 if (mapEntry.getValue() >4)
-                penalty+=50;
-                else penalty+=5;
+                penalty+=1000;
+                else penalty+=50;
         }
         return penalty;
+    }
+
+    private int getSpecialDayPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutes, List<SpecialDayEntity> specialDayEntities) {
+        HashMap<Shift, Long> allShifts = new HashMap<>();
+        allShifts.putAll(immutable);
+        allShifts.putAll(mutable);
+
+        HashMap<Long, Integer> specialDayMinutes = new HashMap<>();
+//        for (WorkerEntity workerEntity : workerEntities) {
+//            sundays.put(workerEntity.getId(), 0);
+//        }
+
+        for (Map.Entry<Shift, Long> mapEntry : allShifts.entrySet()) {
+            if (mapEntry.getValue() != null)
+                specialDayMinutes.put(mapEntry.getValue(),0);
+//            //system.out.println("eni");
+        }
+
+        for(SpecialDayEntity specialDay: specialDayEntities)
+        {
+            if(allShifts.get(new Shift(specialDay.getDay(),1)) != null)
+                specialDayMinutes.put(allShifts.get(new Shift(specialDay.getDay(),1)),specialDayMinutes.get(allShifts.get(new Shift(specialDay.getDay(),1))) + minutes.get(new Shift(specialDay.getDay(),1)));
+            if(allShifts.get(new Shift(specialDay.getDay(),2)) != null)
+                specialDayMinutes.put(allShifts.get(new Shift(specialDay.getDay(),2)),specialDayMinutes.get(allShifts.get(new Shift(specialDay.getDay(),2))) + minutes.get(new Shift(specialDay.getDay(),2)));
+            if(allShifts.get(new Shift(specialDay.getDay(),3)) != null)
+                specialDayMinutes.put(allShifts.get(new Shift(specialDay.getDay(),3)),specialDayMinutes.get(allShifts.get(new Shift(specialDay.getDay(),3))) + minutes.get(new Shift(specialDay.getDay(),3)));
+            if(allShifts.get(new Shift(specialDay.getDay(),4)) != null)
+                specialDayMinutes.put(allShifts.get(new Shift(specialDay.getDay(),4)),specialDayMinutes.get(allShifts.get(new Shift(specialDay.getDay(),4))) + minutes.get(new Shift(specialDay.getDay(),4))/3);
+
+        }
+
+        int most=0, least = 1000000;
+        for (Map.Entry<Long, Integer> mapEntry : specialDayMinutes.entrySet()) {
+            if (mapEntry.getValue()>most)
+                most=mapEntry.getValue();
+            if (mapEntry.getValue()<least)
+                least=mapEntry.getValue();
+        }
+
+        return (most-least)/20;
     }
 
     private int getWeeklyPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutesHashMap) {
@@ -302,7 +448,7 @@ public class MonthService {
             if (mapEntry.getValue() != null)
                 for (int i=0;i<5;i++)
                     minutes.put(new WorkerWeek(mapEntry.getValue(),i),0);
-//            //system.out.println("penis");
+//            //system.out.println("eni");
         }
 
         for (Map.Entry<Shift, Long> mapEntry : allShifts.entrySet()) {
@@ -316,14 +462,15 @@ public class MonthService {
         }
 
         for (Map.Entry<WorkerWeek, Integer> mapEntry : minutes.entrySet()) {
-            if (mapEntry.getValue()>48*60)
+            if (mapEntry.getValue()>50*60)
                 penalty+=(mapEntry.getValue()-48*60)/60;
         }
 
         return penalty;
     }
 
-    private int getMonthlyPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutesHashMap, HashMap<Long, Integer> offsets, HashMap<Long, Integer> holidays) {
+
+    private int getMonthlyPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutesHashMap, HashMap<Long, Integer> offsets, HashMap<Long, HolidayDTO> holidays) {
         HashMap<Shift, Long> allShifts = new HashMap<>();
         allShifts.putAll(immutable);
         allShifts.putAll(mutable);
@@ -333,8 +480,8 @@ public class MonthService {
         for (Map.Entry<Shift, Long> mapEntry : allShifts.entrySet()) {
             //system.out.println(mapEntry.getValue());
             if (mapEntry.getValue() != null)
-                minutesForWorker.put(mapEntry.getValue(),offsets.get(mapEntry.getValue())+holidays.get(mapEntry.getValue()));
-//            //system.out.println("penis");
+                minutesForWorker.put(mapEntry.getValue(),offsets.get(mapEntry.getValue())+holidays.get(mapEntry.getValue()).getMinutesOnHolidays());
+//            //system.out.println("eni");
         }
 
         for (Map.Entry<Shift, Long> mapEntry : allShifts.entrySet()) {
@@ -343,7 +490,7 @@ public class MonthService {
             }
         }
 
-        int most=0, least = 10000;
+        int most=0, least = 1000000;
         for (Map.Entry<Long, Integer> mapEntry : minutesForWorker.entrySet()) {
             if (mapEntry.getValue()>most)
                     most=mapEntry.getValue();
@@ -351,10 +498,32 @@ public class MonthService {
                 least=mapEntry.getValue();
         }
 
-        return (most-least)/60;
+        return (most-least)/20;
     }
 
-    private int getNightsInARowAndDayAfterNightAndSameDayWorkPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, int length) {
+    private int getHolidayPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, HashMap<Long, HolidayDTO> holidays) {
+        HashMap<Shift, Long> allShifts = new HashMap<>();
+        allShifts.putAll(immutable);
+        allShifts.putAll(mutable);
+        int penalty = 0;
+
+        for(Map.Entry<Long,HolidayDTO> holiday:holidays.entrySet())
+        {
+            for(int i=holiday.getValue().getFirstDay();i<=holiday.getValue().getLastDay();i++)
+            {
+                if(allShifts.get(new Shift(i,1))==holiday.getKey()) penalty+=1000;
+                if(allShifts.get(new Shift(i,2))==holiday.getKey()) penalty+=1000;
+                if(allShifts.get(new Shift(i,3))==holiday.getKey()) penalty+=1000;
+                if(allShifts.get(new Shift(i,4))==holiday.getKey()) penalty+=1000;
+
+            }
+        }
+        return penalty;
+
+    }
+
+
+    private int getNightsInARowAndDayAfterNightAndSameDayAnd12sInARowPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, int length) {
         HashMap<Shift, Long> allShifts = new HashMap<>();
         allShifts.putAll(immutable);
         allShifts.putAll(mutable);
@@ -363,24 +532,41 @@ public class MonthService {
         for(int i=1;i<=length-2;i++)
         {
             if(allShifts.get(new Shift(i,4))==allShifts.get(new Shift(i+1,4)))
-                penalty+=5;
+                penalty+=5;//2 nights
             if(allShifts.get(new Shift(i,4))==allShifts.get(new Shift(i+1,4)) && allShifts.get(new Shift(i,4))==allShifts.get(new Shift(i+2,4)))
-                penalty+=495;
+                penalty+=495;//3 nights
             if(allShifts.get(new Shift(i,4))==allShifts.get(new Shift(i+1,1)))
-                penalty+=1000;
+                penalty+=1000;//day after night
             if(     allShifts.get(new Shift(i,1))==allShifts.get(new Shift(i,2)) ||
                     allShifts.get(new Shift(i,1))==allShifts.get(new Shift(i,3)) ||
                     allShifts.get(new Shift(i,1))==allShifts.get(new Shift(i,4)) ||
                     allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i,3)) ||
                     allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i,4)) ||
                     allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i,4)))
-                penalty+=2000;
+                penalty+=2000;//same day
+
+            if(     allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+1,2)) ||
+                    allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+1,3)) ||
+                    allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+1,2)) ||
+                    allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+1,3)))
+                penalty+=10;//2 days second shift
+
+            if(     (allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+1,2)) && allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+2,2))) ||
+                    (allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+1,2)) && allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+2,3))) ||
+                    (allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+1,3)) && allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+2,2))) ||
+                    (allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+1,3)) && allShifts.get(new Shift(i,2))==allShifts.get(new Shift(i+2,3))) ||
+                    (allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+1,2)) && allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+2,2))) ||
+                    (allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+1,2)) && allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+2,3))) ||
+                    (allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+1,3)) && allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+2,2))) ||
+                    (allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+1,3)) && allShifts.get(new Shift(i,3))==allShifts.get(new Shift(i+2,3))))
+                penalty+=1000;//2 days second shift
+
 
         }
         if(allShifts.get(new Shift(length-1,4))==allShifts.get(new Shift(length,4)))
-            penalty+=5;
+            penalty+=5;//2nights in a row
         if(allShifts.get(new Shift(length-1,4))==allShifts.get(new Shift(length,1)))
-            penalty+=1000;
+            penalty+=1000;//day after night
 
         if(     allShifts.get(new Shift(length-1,1))==allShifts.get(new Shift(length-1,2)) ||
                 allShifts.get(new Shift(length-1,1))==allShifts.get(new Shift(length-1,3)) ||
@@ -388,7 +574,7 @@ public class MonthService {
                 allShifts.get(new Shift(length-1,2))==allShifts.get(new Shift(length-1,3)) ||
                 allShifts.get(new Shift(length-1,2))==allShifts.get(new Shift(length-1,4)) ||
                 allShifts.get(new Shift(length-1,3))==allShifts.get(new Shift(length-1,4)))
-            penalty+=2000;
+            penalty+=2000;//same day
 
         if(     allShifts.get(new Shift(length,1))==allShifts.get(new Shift(length,2)) ||
                 allShifts.get(new Shift(length,1))==allShifts.get(new Shift(length,3)) ||
@@ -396,7 +582,15 @@ public class MonthService {
                 allShifts.get(new Shift(length,2))==allShifts.get(new Shift(length,3)) ||
                 allShifts.get(new Shift(length,2))==allShifts.get(new Shift(length,4)) ||
                 allShifts.get(new Shift(length,3))==allShifts.get(new Shift(length,4)))
-            penalty+=2000;
+            penalty+=2000;//same day
+
+        if(     allShifts.get(new Shift(length,2))==allShifts.get(new Shift(length-1,2)) ||
+                allShifts.get(new Shift(length,2))==allShifts.get(new Shift(length-1,3)) ||
+                allShifts.get(new Shift(length,3))==allShifts.get(new Shift(length-1,2)) ||
+                allShifts.get(new Shift(length,3))==allShifts.get(new Shift(length-1,3)))
+            penalty+=10;//2 days second shift
+
+
 
         return penalty;
     }

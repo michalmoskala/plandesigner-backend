@@ -13,6 +13,8 @@ public class HolidayEntity {
     private long workerId;
     private long monthId;
     private int days;
+    private int firstDay;
+    private int lastDay;
 
     public HolidayEntity() {
         super();
@@ -48,5 +50,21 @@ public class HolidayEntity {
 
     public void setDays(int days) {
         this.days = days;
+    }
+
+    public int getFirstDay() {
+        return firstDay;
+    }
+
+    public void setFirstDay(int firstDay) {
+        this.firstDay = firstDay;
+    }
+
+    public int getLastDay() {
+        return lastDay;
+    }
+
+    public void setLastDay(int lastDay) {
+        this.lastDay = lastDay;
     }
 }

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-//todo ta klasa moglaby zostac uwydajniona bo jest taka se
 @Service
 public class WorkerService {
 
@@ -130,7 +129,10 @@ public class WorkerService {
         {
             workedMinutes+=shift.getMinutes();
             if(isSpecial(shift,specialDays))
-                weekendMinutes+=shift.getMinutes();
+                if(shift.getWhichTime()==4)
+                    weekendMinutes+=shift.getMinutes()/3;
+                else
+                    weekendMinutes+=shift.getMinutes();
         }
         return new WorkerDTO(worker,workedMinutes,weekendMinutes);
 
