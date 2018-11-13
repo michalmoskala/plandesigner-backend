@@ -24,7 +24,7 @@ public class BlockService {
         List<BlockEntity> blockEntityList = blockRepository.findAll();
         for (BlockEntity blockEntity : blockEntityList) {
             if (blockEntity.getMonthId() == blockEntity1.getMonthId() && blockEntity.getDay() == blockEntity1.getDay() && blockEntity.getWhichTime() == blockEntity1.getWhichTime()) {
-                shiftRepository.deleteById(blockEntity.getId());
+                blockRepository.deleteById(blockEntity.getId());
                 break;
             }
         }

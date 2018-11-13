@@ -31,7 +31,7 @@ public class ShiftService {
         {
             if (blockEntity.getMonthId()==shiftEntity.getMonthId()&&blockEntity.getDay()==shiftEntity.getDay()&&blockEntity.getWhichTime()==shiftEntity.getWhichTime())
             {
-                shiftRepository.deleteById(blockEntity.getId());
+                blockRepository.deleteById(blockEntity.getId());
                 break;
             }
         }
