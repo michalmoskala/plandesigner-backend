@@ -1,5 +1,7 @@
 package com.example.month.service;
 
+import com.example.block.repository.BlockEntity;
+import com.example.block.repository.BlockRepository;
 import com.example.holiday.repository.HolidayEntity;
 import com.example.holiday.repository.HolidayRepository;
 import com.example.holiday.service.HolidayDTO;
@@ -45,6 +47,9 @@ public class MonthService {
     @Autowired
     private SpecialDayService specialDayService;
 
+    @Autowired
+    private BlockRepository blockRepository;
+
 
     public MonthContainer getMonthContainer(long monthId){
         MonthEntity monthEntity = monthRepository.findById(monthId).get();
@@ -64,11 +69,13 @@ public class MonthService {
         //todo jpql
         List<WorkerEntity> workerEntities = workerRepository.findAll();
 
+        ArrayList<BlockEntity> blockEntities = filterBlocksForMonth(blockRepository.findAll(),monthEntity.getId());
+
         for (int i=1;i<=length;i++)
         {
             DayEntity dayEntity = new DayEntity(i);
             dayEntity.setSpecial(isSpecial(i,specialDays));
-            dayEntity.setShifts(getShiftsForDay(i, shiftEntities,workerEntities));
+            dayEntity.setShifts(getShiftsForDay(i, shiftEntities,workerEntities,blockEntities));
             dayEntity.setWeekday(((monthEntity.getStartingDay()+i-2)%7)+1);
             dayentities.add(dayEntity);
         }
@@ -82,6 +89,15 @@ public class MonthService {
             if(shiftEntity.getMonthId()==id)
                 shiftEntities.add(shiftEntity);
         return shiftEntities;
+
+    }
+
+    private ArrayList<BlockEntity> filterBlocksForMonth(List<BlockEntity> blocks, long id) {
+        ArrayList<BlockEntity> blockEntities = new ArrayList<>();
+        for(BlockEntity blockEntity:blocks)
+            if(blockEntity.getMonthId()==id)
+                blockEntities.add(blockEntity);
+        return blockEntities;
 
     }
 
@@ -101,7 +117,7 @@ public class MonthService {
         return false;
     }
 
-    private HashMap<Integer,ShiftDTO> getShiftsForDay(int day, ArrayList<ShiftEntity> shiftEntities, List<WorkerEntity> workers)
+    private HashMap<Integer,ShiftDTO> getShiftsForDay(int day, ArrayList<ShiftEntity> shiftEntities, List<WorkerEntity> workers, ArrayList<BlockEntity> blockEntities)
     {
         HashMap<Integer, ShiftDTO> shifts = new HashMap<>();
         for (ShiftEntity shiftEntity : shiftEntities)
@@ -111,6 +127,14 @@ public class MonthService {
 
 
         }
+        for (BlockEntity blockEntity : blockEntities)
+        {
+            if(blockEntity.getDay()==day)
+                shifts.put(blockEntity.getWhichTime(),new ShiftDTO(blockEntity));
+
+
+        }
+
         return shifts;
 
     }

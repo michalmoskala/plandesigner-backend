@@ -1,5 +1,7 @@
 package com.example.shift.service;
 
+import com.example.block.repository.BlockEntity;
+import com.example.block.service.BlockDTO;
 import com.example.shift.repository.ShiftEntity;
 
 import javax.persistence.GeneratedValue;
@@ -33,6 +35,17 @@ public class ShiftDTO {
         this.minutes = shift.getMinutes();
         this.specialColor = this.minutes == 300;
         this.workerShortName=workerShortName;
+    }
+
+    public ShiftDTO(BlockEntity shift) {
+        this.id = shift.getId();
+        this.workerId = 0;
+        this.monthId = shift.getMonthId();
+        this.day = shift.getDay();
+        this.whichTime = shift.getWhichTime();
+        this.minutes = 0;
+        this.specialColor = false;
+        this.workerShortName="X";
     }
 
     public long getId() {

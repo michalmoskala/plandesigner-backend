@@ -20,6 +20,10 @@ public class BlockEntity {
         this.whichTime = whichTime;
     }
 
+    public BlockEntity() {
+        super();
+    }
+
     public long getId() {
         return id;
     }
