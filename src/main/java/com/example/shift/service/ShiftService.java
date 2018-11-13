@@ -1,5 +1,7 @@
 package com.example.shift.service;
 
+import com.example.block.repository.BlockEntity;
+import com.example.block.repository.BlockRepository;
 import com.example.shift.repository.ShiftEntity;
 import com.example.shift.repository.ShiftRepository;
 import com.example.worker.repository.WorkerRepository;
@@ -17,9 +19,23 @@ public class ShiftService {
     @Autowired
     private WorkerRepository workerRepository;
 
+    @Autowired
+    private BlockRepository blockRepository;
+
 
     public ShiftDTO postShift(ShiftEntity shiftEntity)
     {
+
+        List<BlockEntity> blockEntityList = blockRepository.findAll();
+        for (BlockEntity blockEntity : blockEntityList)
+        {
+            if (blockEntity.getMonthId()==shiftEntity.getMonthId()&&blockEntity.getDay()==shiftEntity.getDay()&&blockEntity.getWhichTime()==shiftEntity.getWhichTime())
+            {
+                shiftRepository.deleteById(blockEntity.getId());
+                break;
+            }
+        }
+
         //todo jpql
         List<ShiftEntity> shiftEntityList = shiftRepository.findAll();
         for (ShiftEntity shiftEntity1: shiftEntityList){

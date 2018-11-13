@@ -4,18 +4,19 @@ import com.example.holiday.service.HolidayDTO;
 import com.example.month.repository.MonthEntity;
 import com.example.specialday.repository.SpecialDayEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 public class MapTrio {
-    HashMap<Shift, Long> immutable;
-    LinkedHashMap<Shift, Long> mutable;
-    HashMap<Shift, Integer> minutes;
-    MonthEntity monthEntity;
-    HashMap<Long, Integer> offsets;
-    HashMap<Long, HolidayDTO> holidays;
-    List<SpecialDayEntity> specialDayEntities;
+    private HashMap<Shift, Long> immutable;
+    private LinkedHashMap<Shift, Long> mutable;
+    private HashMap<Shift, Integer> minutes;
+    private MonthEntity monthEntity;
+    private HashMap<Long, Integer> offsets;
+    private HashMap<Long, HolidayDTO> holidays;
+    private List<SpecialDayEntity> specialDayEntities;
 
     public MapTrio(HashMap<Shift, Long> immutable, LinkedHashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutes, MonthEntity monthEntity, HashMap<Long, Integer> offsets, HashMap<Long, HolidayDTO> holidays, List<SpecialDayEntity> specialDayEntities) {
         this.immutable = immutable;
@@ -25,6 +26,23 @@ public class MapTrio {
         this.offsets = offsets;
         this.holidays = holidays;
         this.specialDayEntities = specialDayEntities;
+    }
+
+    public MapTrio(MapTrio another) {
+        this.immutable= new HashMap<>();
+        this.immutable.putAll(another.immutable);
+        this.mutable = new LinkedHashMap<>();
+        this.mutable.putAll(another.mutable);
+        this.minutes = new LinkedHashMap<>();
+        this.minutes.putAll(another.minutes);
+
+        this.monthEntity = another.monthEntity;
+
+        this.offsets = new LinkedHashMap<>();
+        this.offsets.putAll(another.offsets);
+        this.holidays = new LinkedHashMap<>();
+        this.holidays.putAll(another.holidays);
+        this.specialDayEntities = another.specialDayEntities;
     }
 
     public MapTrio(MapTrio mapTrio, LinkedHashMap<Shift, Long> mutable)
