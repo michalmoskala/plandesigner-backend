@@ -36,12 +36,13 @@ public class ShiftRestController {
         return shiftService.putMinutes(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable("id") long id){
-        shiftService.deleteById(id);
+
+    @DeleteMapping("/{day}/{whichTime}/{monthId}")
+    public void deleteById(@PathVariable("day") long day, @PathVariable("whichTime") long whichTime, @PathVariable("monthId") long monthId){
+        shiftService.deleteByTime(day,whichTime,monthId);
     }
 
-    //hujowo lepiej nie uzywac
+    //lepiej nie uzywac
     @PutMapping("/{id}/worker")
     public ShiftEntity putWorker(@PathVariable long id, @RequestBody long workerId){
         return shiftService.putWorker(workerId,id);

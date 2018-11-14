@@ -2,12 +2,14 @@ package com.example.shift.service;
 
 import com.example.block.repository.BlockEntity;
 import com.example.block.repository.BlockRepository;
+import com.example.month.Shift;
 import com.example.shift.repository.ShiftEntity;
 import com.example.shift.repository.ShiftRepository;
 import com.example.worker.repository.WorkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -77,9 +79,24 @@ public class ShiftService {
         return shiftRepository.save(shiftEntity);
     }
 
-    public void deleteById(long id)
+    public void deleteByTime(long day, long whichTime, long monthId)
     {
-        shiftRepository.deleteById(id);
+        List<ShiftEntity> shiftEntities = shiftRepository.findAll();
+        List<BlockEntity> blockEntities = blockRepository.findAll();
+
+        for (ShiftEntity shiftEntity:shiftEntities){
+            if (monthId==shiftEntity.getMonthId()&&day==shiftEntity.getDay()&&whichTime==shiftEntity.getWhichTime()) {
+                shiftRepository.delete(shiftEntity);
+                return;
+            }
+        }
+
+        for (BlockEntity blockEntity:blockEntities){
+            if (monthId==blockEntity.getMonthId()&&day==blockEntity.getDay()&&whichTime==blockEntity.getWhichTime()) {
+                blockRepository.delete(blockEntity);
+                return;
+            }
+        }
     }
 
 
