@@ -79,7 +79,7 @@ public class ShiftService {
         return shiftRepository.save(shiftEntity);
     }
 
-    public String deleteByTime(ShiftEntity received)
+    public String deleteByTime(SimpleShiftDTO received)
     {
         List<ShiftEntity> shiftEntities = shiftRepository.findAll();
         List<BlockEntity> blockEntities = blockRepository.findAll();

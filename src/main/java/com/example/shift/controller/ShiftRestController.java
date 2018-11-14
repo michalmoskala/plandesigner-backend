@@ -3,6 +3,7 @@ package com.example.shift.controller;
 import com.example.shift.repository.ShiftEntity;
 import com.example.shift.service.ShiftDTO;
 import com.example.shift.service.ShiftService;
+import com.example.shift.service.SimpleShiftDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,8 +39,8 @@ public class ShiftRestController {
 
 
     @DeleteMapping("")
-    public void deleteByTime(@RequestBody ShiftEntity shiftEntity){
-        shiftService.deleteByTime(shiftEntity);
+    public String deleteByTime(@RequestBody SimpleShiftDTO shiftEntity){
+        return shiftService.deleteByTime(shiftEntity);
     }
 
     //lepiej nie uzywac
