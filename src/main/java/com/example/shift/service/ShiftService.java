@@ -79,24 +79,25 @@ public class ShiftService {
         return shiftRepository.save(shiftEntity);
     }
 
-    public void deleteByTime(long day, long whichTime, long monthId)
+    public String deleteByTime(ShiftEntity received)
     {
         List<ShiftEntity> shiftEntities = shiftRepository.findAll();
         List<BlockEntity> blockEntities = blockRepository.findAll();
 
         for (ShiftEntity shiftEntity:shiftEntities){
-            if (monthId==shiftEntity.getMonthId()&&day==shiftEntity.getDay()&&whichTime==shiftEntity.getWhichTime()) {
+            if (received.getMonthId()==shiftEntity.getMonthId()&&received.getDay()==shiftEntity.getDay()&&received.getWhichTime()==shiftEntity.getWhichTime()) {
                 shiftRepository.delete(shiftEntity);
-                return;
+                return "OK";
             }
         }
 
         for (BlockEntity blockEntity:blockEntities){
-            if (monthId==blockEntity.getMonthId()&&day==blockEntity.getDay()&&whichTime==blockEntity.getWhichTime()) {
+            if (received.getMonthId()==blockEntity.getMonthId()&&received.getDay()==blockEntity.getDay()&&received.getWhichTime()==blockEntity.getWhichTime()) {
                 blockRepository.delete(blockEntity);
-                return;
+                return "OK";
             }
         }
+        throw new NullPointerException();
     }
 
 

@@ -37,9 +37,9 @@ public class ShiftRestController {
     }
 
 
-    @DeleteMapping("/{day}/{whichTime}/{monthId}")
-    public void deleteById(@PathVariable("day") long day, @PathVariable("whichTime") long whichTime, @PathVariable("monthId") long monthId){
-        shiftService.deleteByTime(day,whichTime,monthId);
+    @DeleteMapping("")
+    public void deleteByTime(@RequestBody ShiftEntity shiftEntity){
+        shiftService.deleteByTime(shiftEntity);
     }
 
     //lepiej nie uzywac
