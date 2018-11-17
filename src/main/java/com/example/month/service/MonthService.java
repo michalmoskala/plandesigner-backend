@@ -83,6 +83,32 @@ public class MonthService {
 
     }
 
+    ArrayList<DayEntity> fillDayEntitiesForAlgo(MonthEntity monthEntity){
+        ArrayList<DayEntity> dayentities = new ArrayList<>();
+        int length = monthEntity.getDays();
+
+        //todo jpql
+        ArrayList<ShiftEntity> shiftEntities = filterShiftsForMonth(shiftRepository.findAll(),monthEntity.getId());
+
+        //todo jpql
+        ArrayList<SpecialDayEntity> specialDays = filterSpecialDaysForMonth(specialDayRepository.findAll(),monthEntity.getId());
+
+        //todo jpql
+        List<WorkerEntity> workerEntities = workerRepository.findAll();
+
+
+        for (int i=1;i<=length;i++)
+        {
+            DayEntity dayEntity = new DayEntity(i);
+            dayEntity.setSpecial(isSpecial(i,specialDays));
+            dayEntity.setShifts(getShiftsForDayForAlgo(i, shiftEntities,workerEntities));
+            dayEntity.setWeekday(((monthEntity.getStartingDay()+i-2)%7)+1);
+            dayentities.add(dayEntity);
+        }
+        return dayentities;
+
+    }
+
     private ArrayList<ShiftEntity> filterShiftsForMonth(List<ShiftEntity> shifts, long id) {
         ArrayList<ShiftEntity> shiftEntities = new ArrayList<>();
         for(ShiftEntity shiftEntity:shifts)
@@ -134,6 +160,22 @@ public class MonthService {
 
 
         }
+
+        return shifts;
+
+    }
+
+    private HashMap<Integer,ShiftDTO> getShiftsForDayForAlgo(int day, ArrayList<ShiftEntity> shiftEntities, List<WorkerEntity> workers)
+    {
+        HashMap<Integer, ShiftDTO> shifts = new HashMap<>();
+        for (ShiftEntity shiftEntity : shiftEntities)
+        {
+            if(shiftEntity.getDay()==day)
+                shifts.put(shiftEntity.getWhichTime(),new ShiftDTO(shiftEntity,getWorkerShortName(shiftEntity.getWorkerId(),workers)));
+
+
+        }
+
 
         return shifts;
 
@@ -195,52 +237,12 @@ public class MonthService {
 
     public int getSumOfPenalties(long monthId)
     {
-        //todo:
         ArrayList<Shift> immutableEmpties = new ArrayList<>();
-//        immutableEmpties.add(new Shift(3,1));
-//        immutableEmpties.add(new Shift(4,1));
-//        immutableEmpties.add(new Shift(5,1));
-//        immutableEmpties.add(new Shift(6,1));
-//        immutableEmpties.add(new Shift(7,1));
-//        immutableEmpties.add(new Shift(10,1));
-//        immutableEmpties.add(new Shift(11,1));
-//        immutableEmpties.add(new Shift(12,1));
-//        immutableEmpties.add(new Shift(13,1));
-//        immutableEmpties.add(new Shift(14,1));
-//        immutableEmpties.add(new Shift(17,1));
-//        immutableEmpties.add(new Shift(18,1));
-//        immutableEmpties.add(new Shift(19,1));
-//        immutableEmpties.add(new Shift(20,1));
-//        immutableEmpties.add(new Shift(21,1));
-//        immutableEmpties.add(new Shift(24,1));
-//        immutableEmpties.add(new Shift(25,1));
-//        immutableEmpties.add(new Shift(26,1));
-//        immutableEmpties.add(new Shift(27,1));
-//        immutableEmpties.add(new Shift(28,1));
 
-        immutableEmpties.add(new Shift(2,1));
-        immutableEmpties.add(new Shift(2,2));
-        immutableEmpties.add(new Shift(5,1));
-        immutableEmpties.add(new Shift(6,1));
-        immutableEmpties.add(new Shift(7,1));
-        immutableEmpties.add(new Shift(8,1));
-        immutableEmpties.add(new Shift(9,1));
-        immutableEmpties.add(new Shift(12,1));
-        immutableEmpties.add(new Shift(13,1));
-        immutableEmpties.add(new Shift(14,1));
-        immutableEmpties.add(new Shift(15,1));
-        immutableEmpties.add(new Shift(16,1));
-        immutableEmpties.add(new Shift(19,1));
-        immutableEmpties.add(new Shift(20,1));
-        immutableEmpties.add(new Shift(21,1));
-        immutableEmpties.add(new Shift(22,1));
-        immutableEmpties.add(new Shift(23,1));
-        immutableEmpties.add(new Shift(26,1));
-        immutableEmpties.add(new Shift(27,1));
-        immutableEmpties.add(new Shift(28,1));
-        immutableEmpties.add(new Shift(29,1));
-        immutableEmpties.add(new Shift(30,1));
-
+        List<BlockEntity> blockEntities = filterBlocksForMonth(blockRepository.findAll(), monthId);
+        for(BlockEntity blockEntity: blockEntities) {
+            immutableEmpties.add(new Shift(blockEntity.getDay(),blockEntity.getWhichTime()));
+        }
 
         List<WorkerEntity> workerEntities = workerRepository.findAll();
         MapTrio mapTrio = createMonthMap(monthId, immutableEmpties, workerEntities);
@@ -250,7 +252,7 @@ public class MonthService {
         int iter = 0;
         HashMap<Integer,Shift> numberToMutable = new HashMap<>();
         MapTrio bestSoFar = null;
-        int bestPenSoFar=Integer.MAX_VALUE;
+        int bestPenSoFar;
 
 
 
@@ -267,6 +269,8 @@ public class MonthService {
 //            mapTrio.getMutable().put(mapEntry.getKey(), min.getKey());
 //        }
 
+
+        //do odkomentowania
         for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
             numberToMutable.put(iter,mapEntry.getKey());
             iter++;
@@ -295,6 +299,7 @@ public class MonthService {
             mapTrio = new MapTrio(bestSoFar);
             System.out.println(bestPenSoFar);
         }
+        //do odkomentowania
 
 
 
@@ -313,7 +318,7 @@ public class MonthService {
             }
         }
 
-        System.out.println(getPenalty(mapTrio));
+         System.out.println(getPenalty(mapTrio));
 
         int prev=Integer.MAX_VALUE;
         LinkedHashMap<Shift, Long> newMutable;
@@ -424,7 +429,7 @@ public class MonthService {
         }
 
         MonthEntity monthEntity = monthRepository.findById(monthId).get();
-        ArrayList<DayEntity> dayEntities = fillDayEntities(monthEntity);
+        ArrayList<DayEntity> dayEntities = fillDayEntitiesForAlgo(monthEntity);
 
         for (DayEntity dayEntity : dayEntities) {
             if (dayEntity.getShiftOne() != null) {
