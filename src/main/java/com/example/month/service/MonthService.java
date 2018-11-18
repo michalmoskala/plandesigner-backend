@@ -310,7 +310,16 @@ public class MonthService {
 
         }
 
-        return mapTrio.getMutable().size();
+        int i=0;
+        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+            i++;
+            if(i%20==0)
+                System.out.println(i);
+            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
+        }
+
+
+        return lowestPenSoFar;
 
     }
 
