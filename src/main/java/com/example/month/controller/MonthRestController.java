@@ -53,6 +53,11 @@ public class MonthRestController {
         return monthService.getSumOfPenalties(id);
     }
 
+    @GetMapping("/{id}/bruteforce")
+    public Integer getBFVerification(@PathVariable("id") long id){
+        return monthService.getSumOfPenaltiesByBruteForce(id);
+    }
+
     //ok
     @GetMapping("")
     public List<MonthEntity> findAllMonths(){

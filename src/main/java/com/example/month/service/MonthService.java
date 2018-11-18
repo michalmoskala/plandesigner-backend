@@ -235,7 +235,86 @@ public class MonthService {
         return new HolidayDTO(0,32,0);
     }
 
-    public int getSumOfPenalties(long monthId)
+    private Boolean raiseWorker(Map.Entry<Shift, Long> mapEntry, List<WorkerEntity> workerEntities,long firstWorker)
+    {
+        Boolean ts=false;
+        for (WorkerEntity workerEntity:workerEntities){
+            if(ts)
+            {
+                mapEntry.setValue(workerEntity.getId());
+                return true;
+            }
+            if(workerEntity.getId()==mapEntry.getValue())
+            {
+                ts=true;
+            }
+        }
+
+        mapEntry.setValue(firstWorker);
+        return false;
+
+    }
+
+    public int getSumOfPenaltiesByBruteForce(long monthId) {
+        ArrayList<Shift> immutableEmpties = new ArrayList<>();
+
+        List<BlockEntity> blockEntities = filterBlocksForMonth(blockRepository.findAll(), monthId);
+        for (BlockEntity blockEntity : blockEntities) {
+            immutableEmpties.add(new Shift(blockEntity.getDay(), blockEntity.getWhichTime()));
+        }
+
+        List<WorkerEntity> workerEntities = workerRepository.findAll();
+        MapTrio mapTrio = createMonthMap(monthId, immutableEmpties, workerEntities);
+
+        MapTrio bestSoFar = null;
+        int lowestPenSoFar = Integer.MAX_VALUE;
+
+        int penalty=1;
+
+        long firstWorker = 0, lastWorker = 0;
+        //find lowest element
+        for(WorkerEntity workerEntity: workerEntities)
+        {
+            firstWorker = workerEntity.getId();
+            break;
+        }
+
+        //find highest element
+        for(WorkerEntity workerEntity: workerEntities)
+        {
+            lastWorker = workerEntity.getId();
+        }
+
+        //set lowest element to all
+        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+            mapEntry.setValue(firstWorker);
+        }
+
+        //bruteforce
+        Boolean end=false;
+        while(!end){
+            int pen=getPenalty(mapTrio);
+            if(lowestPenSoFar>pen)
+                lowestPenSoFar=pen;
+            for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+                if (raiseWorker(mapEntry,workerEntities,firstWorker))
+                    break;
+            }
+
+            for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()){
+                if (mapEntry.getValue()!=lastWorker)
+                    break;
+                end=true;
+
+            }
+
+        }
+
+        return lowestPenSoFar;
+
+    }
+
+        public int getSumOfPenalties(long monthId)
     {
         ArrayList<Shift> immutableEmpties = new ArrayList<>();
 
@@ -270,7 +349,7 @@ public class MonthService {
 //        }
 
 
-        //do odkomentowania
+        //do odkomentowaniaV
         for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
             numberToMutable.put(iter,mapEntry.getKey());
             iter++;
