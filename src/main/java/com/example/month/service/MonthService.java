@@ -310,7 +310,7 @@ public class MonthService {
 
         }
 
-        return lowestPenSoFar;
+        return mapTrio.getMutable().size();
 
     }
 
