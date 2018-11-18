@@ -255,6 +255,14 @@ public class MonthService {
 
     }
 
+    private Boolean allAreFinal(LinkedHashMap<Shift, Long> mutable, long lastWorker) {
+        for (Map.Entry<Shift, Long> mapEntry : mutable.entrySet()) {
+            if (mapEntry.getValue()!=lastWorker)
+                return false;
+        }
+        return true;
+    }
+
     public int getSumOfPenaltiesByBruteForce(long monthId) {
         ArrayList<Shift> immutableEmpties = new ArrayList<>();
 
@@ -301,22 +309,20 @@ public class MonthService {
                     break;
             }
 
-            for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()){
-                if (mapEntry.getValue()!=lastWorker)
-                    break;
+            if (allAreFinal(mapTrio.getMutable(),lastWorker))
                 end=true;
 
             }
 
-        }
 
-        int i=0;
-        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
-            i++;
-            if(i%20==0)
-                System.out.println(i);
-            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
-        }
+            //db
+//        int i=0;
+//        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+//            i++;
+//            if(i%20==0)
+//                System.out.println(i);
+//            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
+//        }
 
 
         return lowestPenSoFar;
