@@ -459,14 +459,14 @@ public class MonthService {
 //        }
 //        penalty = getPenalty(mapTrio);
 
-
-        int i=0;
-        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
-            i++;
-            if(i%20==0)
-            System.out.println(i);
-            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
-        }
+//       db
+//        int i=0;
+//        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+//            i++;
+//            if(i%20==0)
+//            System.out.println(i);
+//            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
+//        }
 
         return penalty;
     }
