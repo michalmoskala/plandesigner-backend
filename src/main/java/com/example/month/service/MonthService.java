@@ -364,39 +364,38 @@ public class MonthService {
 //        }
 
 
-        //do odkomentowaniaV
-        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
-            numberToMutable.put(iter,mapEntry.getKey());
-            iter++;
-
-        }
-
-        for(int i = 0; i < iter/4; i++) {
-            bestPenSoFar=Integer.MAX_VALUE;
-
-            for (WorkerEntity workerEntity1 : workerEntities) {
-                for (WorkerEntity workerEntity2 : workerEntities) {
-                    for (WorkerEntity workerEntity3 : workerEntities) {
-                        for (WorkerEntity workerEntity4 : workerEntities) {
-                            mapTrio.getMutable().put(numberToMutable.get(i*4),workerEntity1.getId());
-                            mapTrio.getMutable().put(numberToMutable.get((i*4)+1),workerEntity2.getId());
-                            mapTrio.getMutable().put(numberToMutable.get((i*4)+2),workerEntity3.getId());
-                            mapTrio.getMutable().put(numberToMutable.get((i*4)+3),workerEntity4.getId());
-                            if(getPenalty(mapTrio) < bestPenSoFar) {
-                                bestSoFar = new MapTrio(mapTrio);
-                                bestPenSoFar=getPenalty(mapTrio);
-                            }
-                        }
-                    }
-                }
-            }
-            mapTrio = new MapTrio(bestSoFar);
-            System.out.println(bestPenSoFar);
-        }
-        //do odkomentowania
-
+        //greedy+
+//        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+//            numberToMutable.put(iter,mapEntry.getKey());
+//            iter++;
+//
+//        }
+//
+//        for(int i = 0; i < iter/4; i++) {
+//            bestPenSoFar=Integer.MAX_VALUE;
+//
+//            for (WorkerEntity workerEntity1 : workerEntities) {
+//                for (WorkerEntity workerEntity2 : workerEntities) {
+//                    for (WorkerEntity workerEntity3 : workerEntities) {
+//                        for (WorkerEntity workerEntity4 : workerEntities) {
+//                            mapTrio.getMutable().put(numberToMutable.get(i*4),workerEntity1.getId());
+//                            mapTrio.getMutable().put(numberToMutable.get((i*4)+1),workerEntity2.getId());
+//                            mapTrio.getMutable().put(numberToMutable.get((i*4)+2),workerEntity3.getId());
+//                            mapTrio.getMutable().put(numberToMutable.get((i*4)+3),workerEntity4.getId());
+//                            if(getPenalty(mapTrio) < bestPenSoFar) {
+//                                bestSoFar = new MapTrio(mapTrio);
+//                                bestPenSoFar=getPenalty(mapTrio);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            mapTrio = new MapTrio(bestSoFar);
+//            System.out.println(bestPenSoFar);
+//        }
 
 
+        //greedy
         for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
             if(mapEntry.getValue() == null) {
                 for (WorkerEntity workerEntity : workerEntities) {
