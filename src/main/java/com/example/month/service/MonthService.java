@@ -5,7 +5,6 @@ import com.example.block.repository.BlockRepository;
 import com.example.holiday.repository.HolidayEntity;
 import com.example.holiday.repository.HolidayRepository;
 import com.example.holiday.service.HolidayDTO;
-import com.example.month.*;
 import com.example.month.repository.MonthEntity;
 import com.example.month.repository.MonthRepository;
 import com.example.offset.repository.OffsetEntity;
@@ -237,16 +236,16 @@ public class MonthService {
 
     private Boolean raiseWorker(Map.Entry<Shift, Long> mapEntry, List<WorkerEntity> workerEntities,long firstWorker)
     {
-        Boolean ts=false;
+        Boolean prev=false;
         for (WorkerEntity workerEntity:workerEntities){
-            if(ts)
+            if(prev)
             {
                 mapEntry.setValue(workerEntity.getId());
                 return true;
             }
             if(workerEntity.getId()==mapEntry.getValue())
             {
-                ts=true;
+                prev=true;
             }
         }
 
@@ -277,7 +276,6 @@ public class MonthService {
         MapTrio bestSoFar = null;
         int lowestPenSoFar = Integer.MAX_VALUE;
 
-        int penalty=1;
 
         long firstWorker = 0, lastWorker = 0;
         //find lowest element
@@ -303,7 +301,10 @@ public class MonthService {
         while(!end){
             int pen=getPenalty(mapTrio);
             if(lowestPenSoFar>pen)
+            {
                 lowestPenSoFar=pen;
+                bestSoFar=new MapTrio(mapTrio);
+            }
             for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
                 if (raiseWorker(mapEntry,workerEntities,firstWorker))
                     break;
@@ -311,8 +312,7 @@ public class MonthService {
 
             if (allAreFinal(mapTrio.getMutable(),lastWorker))
                 end=true;
-
-            }
+        }
 
 
             //db
@@ -414,25 +414,26 @@ public class MonthService {
 
          System.out.println(getPenalty(mapTrio));
 
-        int prev=Integer.MAX_VALUE;
-        LinkedHashMap<Shift, Long> newMutable;
-        for (int i=0;i<100;i++){
-            for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
-                 for (WorkerEntity workerEntity : workerEntities){
-                     newMutable = new LinkedHashMap<>(mapTrio.getMutable());
-                     newMutable.put(mapEntry.getKey(),workerEntity.getId());
-                     if(getPenalty(new MapTrio(mapTrio,newMutable))<getPenalty(mapTrio))
-                         mapTrio.setMutable(newMutable);
-                 }
-            }
-            System.out.println(getPenalty(mapTrio));
-            if (getPenalty(mapTrio)<prev)
-                prev=getPenalty(mapTrio);
-            else
-                break;
-        }
-
-        penalty = getPenalty(mapTrio);
+        //poprawianie 2opt
+//        int prev=Integer.MAX_VALUE;
+//        LinkedHashMap<Shift, Long> newMutable;
+//        for (int i=0;i<100;i++){
+//            for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+//                 for (WorkerEntity workerEntity : workerEntities){
+//                     newMutable = new LinkedHashMap<>(mapTrio.getMutable());
+//                     newMutable.put(mapEntry.getKey(),workerEntity.getId());
+//                     if(getPenalty(new MapTrio(mapTrio,newMutable))<getPenalty(mapTrio))
+//                         mapTrio.setMutable(newMutable);
+//                 }
+//            }
+//            System.out.println(getPenalty(mapTrio));
+//            if (getPenalty(mapTrio)<prev)
+//                prev=getPenalty(mapTrio);
+//            else
+//                break;
+//        }
+//
+//        penalty = getPenalty(mapTrio);
 
 
 //        for(int i = 0; i < iter/4; i++) {
@@ -468,7 +469,7 @@ public class MonthService {
 //            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
 //        }
 
-        return penalty;
+        return getPenalty(mapTrio);
     }
 
     public ShiftDTO postShift(Map.Entry<Shift, Long> workerEntry, Integer minutes, long monthId)

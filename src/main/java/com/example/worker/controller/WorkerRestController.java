@@ -32,10 +32,6 @@ public class WorkerRestController {
     }
 
 
-    @PutMapping("/{id}")
-    public WorkerEntity putWorker(@PathVariable long id, @RequestBody WorkerEntity workerEntity){
-        return workerService.putWorker(workerEntity,id);
-    }
 
     //ok
     @PostMapping("")

@@ -1,4 +1,4 @@
-package com.example.month;
+package com.example.month.service;
 
 import com.example.shift.service.ShiftDTO;
 

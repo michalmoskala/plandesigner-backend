@@ -1,8 +1,6 @@
-package com.example.month;
+package com.example.month.service;
 
 import com.example.month.repository.MonthEntity;
-import com.example.shift.repository.ShiftEntity;
-import com.example.specialday.repository.SpecialDayEntity;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,14 +2,12 @@ package com.example.shift.service;
 
 import com.example.block.repository.BlockEntity;
 import com.example.block.repository.BlockRepository;
-import com.example.month.Shift;
 import com.example.shift.repository.ShiftEntity;
 import com.example.shift.repository.ShiftRepository;
 import com.example.worker.repository.WorkerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,7 +36,6 @@ public class ShiftService {
             }
         }
 
-        //todo jpql
         List<ShiftEntity> shiftEntityList = shiftRepository.findAll();
         for (ShiftEntity shiftEntity1: shiftEntityList){
             if (shiftEntity1.getMonthId()==shiftEntity.getMonthId()&&shiftEntity1.getDay()==shiftEntity.getDay()&&shiftEntity1.getWhichTime()==shiftEntity.getWhichTime())

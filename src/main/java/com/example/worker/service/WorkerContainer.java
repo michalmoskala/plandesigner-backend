@@ -1,4 +1,4 @@
-package com.example.worker;
+package com.example.worker.service;
 
 import com.example.worker.repository.WorkerEntity;
 
