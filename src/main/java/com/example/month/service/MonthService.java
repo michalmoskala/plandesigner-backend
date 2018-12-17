@@ -365,34 +365,34 @@ public class MonthService {
 
 
         //greedy+
-//        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
-//            numberToMutable.put(iter,mapEntry.getKey());
-//            iter++;
-//
-//        }
-//
-//        for(int i = 0; i < iter/4; i++) {
-//            bestPenSoFar=Integer.MAX_VALUE;
-//
-//            for (WorkerEntity workerEntity1 : workerEntities) {
-//                for (WorkerEntity workerEntity2 : workerEntities) {
-//                    for (WorkerEntity workerEntity3 : workerEntities) {
-//                        for (WorkerEntity workerEntity4 : workerEntities) {
-//                            mapTrio.getMutable().put(numberToMutable.get(i*4),workerEntity1.getId());
-//                            mapTrio.getMutable().put(numberToMutable.get((i*4)+1),workerEntity2.getId());
-//                            mapTrio.getMutable().put(numberToMutable.get((i*4)+2),workerEntity3.getId());
-//                            mapTrio.getMutable().put(numberToMutable.get((i*4)+3),workerEntity4.getId());
-//                            if(getPenalty(mapTrio) < bestPenSoFar) {
-//                                bestSoFar = new MapTrio(mapTrio);
-//                                bestPenSoFar=getPenalty(mapTrio);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            mapTrio = new MapTrio(bestSoFar);
-//            System.out.println(bestPenSoFar);
-//        }
+        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+            numberToMutable.put(iter,mapEntry.getKey());
+            iter++;
+
+        }
+
+        for(int i = 0; i < iter/4; i++) {
+            bestPenSoFar=Integer.MAX_VALUE;
+
+            for (WorkerEntity workerEntity1 : workerEntities) {
+                for (WorkerEntity workerEntity2 : workerEntities) {
+                    for (WorkerEntity workerEntity3 : workerEntities) {
+                        for (WorkerEntity workerEntity4 : workerEntities) {
+                            mapTrio.getMutable().put(numberToMutable.get(i*4),workerEntity1.getId());
+                            mapTrio.getMutable().put(numberToMutable.get((i*4)+1),workerEntity2.getId());
+                            mapTrio.getMutable().put(numberToMutable.get((i*4)+2),workerEntity3.getId());
+                            mapTrio.getMutable().put(numberToMutable.get((i*4)+3),workerEntity4.getId());
+                            if(getPenalty(mapTrio) < bestPenSoFar) {
+                                bestSoFar = new MapTrio(mapTrio);
+                                bestPenSoFar=getPenalty(mapTrio);
+                            }
+                        }
+                    }
+                }
+            }
+            mapTrio = new MapTrio(bestSoFar);
+            System.out.println(bestPenSoFar);
+        }
 
 
         //greedy
@@ -414,25 +414,25 @@ public class MonthService {
          System.out.println(getPenalty(mapTrio));
 
         //poprawianie 2opt
-//        int prev=Integer.MAX_VALUE;
-//        LinkedHashMap<Shift, Long> newMutable;
-//        for (int i=0;i<100;i++){
-//            for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
-//                 for (WorkerEntity workerEntity : workerEntities){
-//                     newMutable = new LinkedHashMap<>(mapTrio.getMutable());
-//                     newMutable.put(mapEntry.getKey(),workerEntity.getId());
-//                     if(getPenalty(new MapTrio(mapTrio,newMutable))<getPenalty(mapTrio))
-//                         mapTrio.setMutable(newMutable);
-//                 }
-//            }
-//            System.out.println(getPenalty(mapTrio));
-//            if (getPenalty(mapTrio)<prev)
-//                prev=getPenalty(mapTrio);
-//            else
-//                break;
-//        }
-//
-//        penalty = getPenalty(mapTrio);
+        int prev=Integer.MAX_VALUE;
+        LinkedHashMap<Shift, Long> newMutable;
+        for (int i=0;i<100000;i++){
+            for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+                 for (WorkerEntity workerEntity : workerEntities){
+                     newMutable = new LinkedHashMap<>(mapTrio.getMutable());
+                     newMutable.put(mapEntry.getKey(),workerEntity.getId());
+                     if(getPenalty(new MapTrio(mapTrio,newMutable))<getPenalty(mapTrio))
+                         mapTrio.setMutable(newMutable);
+                 }
+            }
+            System.out.println(getPenalty(mapTrio));
+            if (getPenalty(mapTrio)<prev)
+                prev=getPenalty(mapTrio);
+            else
+                break;
+        }
+
+        penalty = getPenalty(mapTrio);
 
 
 //        for(int i = 0; i < iter/4; i++) {
@@ -460,13 +460,13 @@ public class MonthService {
 //        penalty = getPenalty(mapTrio);
 
 //       db
-//        int i=0;
-//        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
-//            i++;
-//            if(i%20==0)
-//            System.out.println(i);
-//            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
-//        }
+        int i=0;
+        for(Map.Entry<Shift, Long> mapEntry:mapTrio.getMutable().entrySet()) {
+            i++;
+            if(i%20==0)
+            System.out.println(i);
+            postShift(mapEntry,mapTrio.getMinutes().get(mapEntry.getKey()),monthId);
+        }
 
         return getPenalty(mapTrio);
     }
@@ -668,26 +668,20 @@ public class MonthService {
         HashMap<WorkerWeek, Integer> minutes = new HashMap<>();
 
         for (Map.Entry<Shift, Long> mapEntry : allShifts.entrySet()) {
-            //system.out.println(mapEntry.getValue());
             if (mapEntry.getValue() != null)
                 for (int i=0;i<5;i++)
                     minutes.put(new WorkerWeek(mapEntry.getValue(),i),0);
-//            //system.out.println("eni");
         }
 
         for (Map.Entry<Shift, Long> mapEntry : allShifts.entrySet()) {
             if (mapEntry.getValue() != null) {
-                //system.out.println(mapEntry.getValue());//czl
-                //system.out.println(mapEntry.getKey().getDay() / 7);//tydz
-                //system.out.println(minutes.get(new WorkerWeek(mapEntry.getValue(), mapEntry.getKey().getDay() / 7)));
                 minutes.put(new WorkerWeek(mapEntry.getValue(), mapEntry.getKey().getDay() % 7), minutes.get(new WorkerWeek(mapEntry.getValue(), mapEntry.getKey().getDay() / 7)) + minutesHashMap.get(mapEntry.getKey()));
             }
-
         }
 
         for (Map.Entry<WorkerWeek, Integer> mapEntry : minutes.entrySet()) {
-            if (mapEntry.getValue()>50*60)
-                penalty+=(mapEntry.getValue()-48*60)/60;
+            if (mapEntry.getValue()>49*60)
+                penalty+=(mapEntry.getValue()-49*60)/60;
         }
 
         return penalty;

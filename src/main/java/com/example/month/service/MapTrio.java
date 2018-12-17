@@ -17,7 +17,7 @@ public class MapTrio {
     private HashMap<Long, HolidayDTO> holidays;
     private List<SpecialDayEntity> specialDayEntities;
 
-    public MapTrio(HashMap<Shift, Long> immutable, LinkedHashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutes, MonthEntity monthEntity, HashMap<Long, Integer> offsets, HashMap<Long, HolidayDTO> holidays, List<SpecialDayEntity> specialDayEntities) {
+    MapTrio(HashMap<Shift, Long> immutable, LinkedHashMap<Shift, Long> mutable, HashMap<Shift, Integer> minutes, MonthEntity monthEntity, HashMap<Long, Integer> offsets, HashMap<Long, HolidayDTO> holidays, List<SpecialDayEntity> specialDayEntities) {
         this.immutable = immutable;
         this.mutable = mutable;
         this.minutes = minutes;
@@ -27,7 +27,7 @@ public class MapTrio {
         this.specialDayEntities = specialDayEntities;
     }
 
-    public MapTrio(MapTrio another) {
+    MapTrio(MapTrio another) {
         this.immutable= new HashMap<>();
         this.immutable.putAll(another.immutable);
         this.mutable = new LinkedHashMap<>();
@@ -56,7 +56,7 @@ public class MapTrio {
 
     }
 
-    public HashMap<Shift, Long> getImmutable() {
+    HashMap<Shift, Long> getImmutable() {
         return immutable;
     }
 
@@ -64,7 +64,7 @@ public class MapTrio {
         this.immutable = immutable;
     }
 
-    public LinkedHashMap<Shift, Long> getMutable() {
+    LinkedHashMap<Shift, Long> getMutable() {
         return mutable;
     }
 
@@ -80,7 +80,7 @@ public class MapTrio {
         this.minutes = minutes;
     }
 
-    public MonthEntity getMonthEntity() {
+    MonthEntity getMonthEntity() {
         return monthEntity;
     }
 
@@ -88,7 +88,7 @@ public class MapTrio {
         this.monthEntity = monthEntity;
     }
 
-    public HashMap<Long, Integer> getOffsets() {
+    HashMap<Long, Integer> getOffsets() {
         return offsets;
     }
 
@@ -96,7 +96,7 @@ public class MapTrio {
         this.offsets = offsets;
     }
 
-    public HashMap<Long, HolidayDTO> getHolidays() {
+    HashMap<Long, HolidayDTO> getHolidays() {
         return holidays;
     }
 
@@ -104,7 +104,7 @@ public class MapTrio {
         this.holidays = holidays;
     }
 
-    public List<SpecialDayEntity> getSpecialDayEntities() {
+    List<SpecialDayEntity> getSpecialDayEntities() {
         return specialDayEntities;
     }
 
