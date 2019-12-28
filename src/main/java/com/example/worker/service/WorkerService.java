@@ -83,12 +83,14 @@ public class WorkerService {
 
     private int findDaysOnHolidayForWorker(WorkerEntity worker, List<HolidayEntity> holidayEntities, long monthId)
     {
+        int days = 0;
         for (HolidayEntity holidayEntity:holidayEntities)
         {
             if(holidayEntity.getMonthId() == monthId && holidayEntity.getWorkerId() == worker.getId())
-                return holidayEntity.getDays();
+//                return holidayEntity.getDays();
+                days += holidayEntity.getDays();
         }
-        return 0;
+        return days;
     }
 
     public void deleteById(long id){

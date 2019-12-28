@@ -1,6 +1,7 @@
 package com.example.month.controller;
 
 import com.example.holiday.repository.HolidayEntity;
+import com.example.holiday.service.HolidayNameDTO;
 import com.example.holiday.service.HolidayService;
 import com.example.month.service.MonthContainer;
 import com.example.month.repository.MonthEntity;
@@ -63,6 +64,13 @@ public class MonthRestController {
         return monthService.findAll();
     }
 
+
+    //new
+    @GetMapping("/{id}/holidays")
+    public List<HolidayNameDTO> getAllHolidaysForMonth(@PathVariable("id") long id){
+        return monthService.getAllHolidaysForMonth(id);
+    }
+
     //ok
     @PostMapping("")
     public MonthEntity postMonth(@RequestBody MonthEntity monthEntity){
@@ -92,6 +100,18 @@ public class MonthRestController {
     public HolidayEntity putHoliday(@PathVariable("id") long id, @RequestBody HolidayEntity holidayEntity)
     {
         return holidayService.put(id, holidayEntity);
+    }
+
+    @PostMapping("/{id}/holidays")
+    public HolidayEntity postHoliday(@PathVariable("id") long id, @RequestBody HolidayEntity holidayEntity)
+    {
+        return holidayService.post(id, holidayEntity);
+    }
+
+    @DeleteMapping("/{id}/holidays")
+    public void deleteHoliday(@PathVariable("id") long id)
+    {
+        holidayService.deleteById(id);
     }
 
     @PutMapping("/{id}/special-days")

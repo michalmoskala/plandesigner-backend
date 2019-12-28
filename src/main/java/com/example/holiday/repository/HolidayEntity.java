@@ -67,4 +67,8 @@ public class HolidayEntity {
     public void setLastDay(int lastDay) {
         this.lastDay = lastDay;
     }
+
+    public boolean checkIfInRange(int i) {
+        return i <= lastDay && i >= firstDay;
+    }
 }

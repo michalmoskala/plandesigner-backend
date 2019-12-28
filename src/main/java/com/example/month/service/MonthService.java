@@ -4,7 +4,9 @@ import com.example.block.repository.BlockEntity;
 import com.example.block.repository.BlockRepository;
 import com.example.holiday.repository.HolidayEntity;
 import com.example.holiday.repository.HolidayRepository;
+import com.example.holiday.service.HolidayAlgoDTO;
 import com.example.holiday.service.HolidayDTO;
+import com.example.holiday.service.HolidayNameDTO;
 import com.example.month.repository.MonthEntity;
 import com.example.month.repository.MonthRepository;
 import com.example.offset.repository.OffsetEntity;
@@ -68,12 +70,16 @@ public class MonthService {
         //todo jpql
         List<WorkerEntity> workerEntities = workerRepository.findAll();
 
+        List<HolidayEntity> holidayEntities = filterHolidaysForMonth(holidayRepository.findAll(),monthEntity.getId());
+
+
         ArrayList<BlockEntity> blockEntities = filterBlocksForMonth(blockRepository.findAll(),monthEntity.getId());
 
         for (int i=1;i<=length;i++)
         {
             DayEntity dayEntity = new DayEntity(i);
             dayEntity.setSpecial(isSpecial(i,specialDays));
+            dayEntity.setWorkersOnHoliday(getHolidaysByDay(i,holidayEntities));
             dayEntity.setShifts(getShiftsForDay(i, shiftEntities,workerEntities,blockEntities));
             dayEntity.setWeekday(((monthEntity.getStartingDay()+i-2)%7)+1);
             dayentities.add(dayEntity);
@@ -82,7 +88,18 @@ public class MonthService {
 
     }
 
-    ArrayList<DayEntity> fillDayEntitiesForAlgo(MonthEntity monthEntity){
+    private List<Integer> getHolidaysByDay(int i, List<HolidayEntity> holidayEntities) {
+
+        ArrayList<Integer> workersOnHoliday = new ArrayList<>();
+        for (HolidayEntity holidayEntity:holidayEntities){
+            if (holidayEntity.checkIfInRange(i))
+                workersOnHoliday.add(Integer.valueOf(workerRepository.findById(holidayEntity.getWorkerId()).get().getShortname()));
+        }
+        workersOnHoliday.sort(Comparator.naturalOrder());
+        return workersOnHoliday;
+    }
+
+    private ArrayList<DayEntity> fillDayEntitiesForAlgo(MonthEntity monthEntity){
         ArrayList<DayEntity> dayentities = new ArrayList<>();
         int length = monthEntity.getDays();
 
@@ -132,6 +149,15 @@ public class MonthService {
             if(specialDayEntity.getMonthId()==id)
                 specialDayEntities.add(specialDayEntity);
         return specialDayEntities;
+
+    }
+
+    private ArrayList<HolidayEntity> filterHolidaysForMonth(List<HolidayEntity> holidays, long id) {
+        ArrayList<HolidayEntity> holidayEntities = new ArrayList<>();
+        for(HolidayEntity holidayEntity: holidays)
+            if(holidayEntity.getMonthId()==id)
+                holidayEntities.add(holidayEntity);
+        return holidayEntities;
 
     }
 
@@ -500,9 +526,16 @@ public class MonthService {
         penalty += getSundaysPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMonthEntity().getStartingDay());
         penalty += getWeeklyPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMinutes());
         penalty += getNightsInARowAndDayAfterNightAndSameDayAnd12sInARowPenalty(mapTrio.getImmutable(), mapTrio.getMutable(), mapTrio.getMonthEntity().getDays());
-        penalty += getHolidayPenalty(mapTrio.getImmutable(),mapTrio.getMutable(),mapTrio.getHolidays());
+        penalty += getHolidayPenalty(mapTrio.getImmutable(),mapTrio.getMutable(),createHolidayAlgoDTO(mapTrio.getHolidays()));
         penalty += getSpecialDayPenalty(mapTrio.getImmutable(),mapTrio.getMutable(),mapTrio.getMinutes(),mapTrio.getSpecialDayEntities());
         return penalty;
+    }
+
+    private ArrayList<HolidayAlgoDTO> createHolidayAlgoDTO(HashMap<Long,HolidayDTO> holidays) {
+        ArrayList<HolidayAlgoDTO> holidayList = new ArrayList<>();
+        for (Map.Entry<Long,HolidayDTO> holiday : holidays.entrySet())
+            holidayList.add(new HolidayAlgoDTO(holiday.getValue(),holiday.getKey()));
+        return holidayList;
     }
 
     private MapTrio createMonthMap(long monthId, ArrayList<Shift> listOfImmutableEmptyShifts, List<WorkerEntity> workerEntities) {
@@ -719,21 +752,21 @@ public class MonthService {
         return (most-least)/20;
     }
 
-    private int getHolidayPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, HashMap<Long, HolidayDTO> holidays) {
+    private int getHolidayPenalty(HashMap<Shift, Long> immutable, HashMap<Shift, Long> mutable, ArrayList<HolidayAlgoDTO> holidays) {
         HashMap<Shift, Long> allShifts = new HashMap<>();
         allShifts.putAll(immutable);
         allShifts.putAll(mutable);
         int penalty = 0;
 
-        for(Map.Entry<Long,HolidayDTO> holiday:holidays.entrySet())
+//        for(Map.Entry<Long,HolidayDTO> holiday:holidays.entrySet())
+        for (HolidayAlgoDTO holiday : holidays)
         {
-            for(int i=holiday.getValue().getFirstDay();i<=holiday.getValue().getLastDay();i++)
+            for(int i=holiday.getFirstDay();i<=holiday.getLastDay();i++)
             {
-                if(allShifts.get(new Shift(i,1))==holiday.getKey()) penalty+=1000;
-                if(allShifts.get(new Shift(i,2))==holiday.getKey()) penalty+=1000;
-                if(allShifts.get(new Shift(i,3))==holiday.getKey()) penalty+=1000;
-                if(allShifts.get(new Shift(i,4))==holiday.getKey()) penalty+=1000;
-
+                if(allShifts.get(new Shift(i,1))!=null && allShifts.get(new Shift(i,1))==holiday.getWorkerId()) penalty+=1000;
+                if(allShifts.get(new Shift(i,2))!=null && allShifts.get(new Shift(i,2))==holiday.getWorkerId()) penalty+=1000;
+                if(allShifts.get(new Shift(i,3))!=null && allShifts.get(new Shift(i,3))==holiday.getWorkerId()) penalty+=1000;
+                if(allShifts.get(new Shift(i,4))!=null && allShifts.get(new Shift(i,4))==holiday.getWorkerId()) penalty+=1000;
             }
         }
         return penalty;
@@ -814,6 +847,54 @@ public class MonthService {
     }
 
 
+    public List<MonthHolidays> deprecatedgetAllHolidaysForMonth(long monthId) {
 
+
+        List<HolidayEntity> holidayList = holidayRepository.findAll();
+        List<WorkerEntity> workerEntityList = workerRepository.findAll();
+        List<MonthHolidays> monthHolidaysList = new ArrayList<>();
+        MonthHolidays monthHoliday;
+
+        for (WorkerEntity workerEntity : workerEntityList)
+        {
+            monthHoliday = new MonthHolidays(workerEntity);
+            for (HolidayEntity holidayEntity1 : holidayList) {
+                if (monthId == holidayEntity1.getMonthId() &&
+                        workerEntity.getId() == holidayEntity1.getWorkerId()) {
+
+                    monthHoliday.addHoliday(holidayEntity1);
+                }
+            }
+            monthHolidaysList.add(monthHoliday);
+        }
+
+
+        return monthHolidaysList;
+    }
+
+    public List<HolidayNameDTO> getAllHolidaysForMonth(long monthId) {
+
+        List<HolidayEntity> holidayList = holidayRepository.findAll();
+        List<HolidayNameDTO> holidayList1 = new ArrayList<>();
+        List<WorkerEntity> workerEntityList = workerRepository.findAll();
+
+        for (HolidayEntity holidayEntity1 : holidayList) {
+            if (monthId == holidayEntity1.getMonthId()) {
+                holidayList1.add(new HolidayNameDTO(holidayEntity1, getWorkerNameById(workerEntityList,holidayEntity1.getWorkerId())));
+            }
+        }
+
+        Collections.sort(holidayList1);
+
+        return holidayList1;
+    }
+
+    private String getWorkerNameById(List <WorkerEntity> workerEntities, long workerId) {
+        for (WorkerEntity workerEntity : workerEntities) {
+            if (workerEntity.getId() == workerId)
+                return workerEntity.getName();
+        }
+        return "errorr";
+    }
 
 }

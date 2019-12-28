@@ -3,6 +3,7 @@ package com.example.month.service;
 import com.example.shift.service.ShiftDTO;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class DayEntity{
     int number;
@@ -12,7 +13,27 @@ public class DayEntity{
     ShiftDTO shiftThree;
     ShiftDTO shiftFour;
     int weekday;
+    String workersOnHoliday;
 
+    public String getWorkersOnHoliday() {
+        return workersOnHoliday;
+    }
+
+    public void setWorkersOnHoliday(List<Integer> workersOnHoliday) {
+        if (workersOnHoliday.isEmpty())
+        {
+            this.workersOnHoliday = ".";
+        }
+        else {
+            StringBuilder a = new StringBuilder();
+            for (Integer worker : workersOnHoliday) {
+                a.append(worker.toString());
+                a.append(" ");
+            }
+            a.deleteCharAt(a.length()-1);
+            this.workersOnHoliday = a.toString();
+        }
+    }
 
     public int getWeekday() {
         return weekday;

@@ -3,10 +3,10 @@ package com.example.month.service;
 import java.util.Objects;
 
 public class WorkerWeek {
-    Long workerId;
-    int week;
+    private Long workerId;
+    private int week;
 
-    public WorkerWeek(Long workerId, int week) {
+    WorkerWeek(Long workerId, int week) {
         this.workerId = workerId;
         this.week = week;
     }
